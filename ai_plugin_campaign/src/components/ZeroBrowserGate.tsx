@@ -7,7 +7,7 @@ import { useBrowserEnvironment } from '../state/BrowserEnvironmentContext';
 export function ZeroBrowserGate({ children }: { children: ReactNode }) {
   const environment = useBrowserEnvironment();
   // 当前关闭门禁弹窗；需要恢复时显式设置 VITE_ZERO_BROWSER_GATE=on。
-  const shouldEnforceGate = import.meta.env.VITE_ZERO_BROWSER_GATE === 'off';
+  const shouldEnforceGate = import.meta.env.VITE_ZERO_BROWSER_GATE === 'on';
 
   if (!shouldEnforceGate || environment.canUseCampaignFeatures) return children;
 
