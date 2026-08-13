@@ -102,7 +102,7 @@ export function CampaignPage() {
     } catch (error) {
       if (error instanceof AiEduConfigurationError) {
         console.error('[AI EDU] 学生登录接口配置错误：', error.message);
-        return '登录服务暂不可用，请联系活动管理员。';
+        return error.message;
       }
       return error instanceof Error ? error.message : '登录失败，请重试。';
     }

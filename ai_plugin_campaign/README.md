@@ -65,11 +65,9 @@ npm run build:deploy
 接口配置参考 `.env.example`：
 
 - `VITE_AI_EDU_API_MODE=production|mock`；
-- `VITE_AI_EDU_ADD_URL`；
-- `VITE_V8_PROTOCOL_KEY`；
-- `VITE_V8_PROTOCOL_IV`。
+- `VITE_AI_EDU_ADD_URL`。
 
-密钥和 IV 默认按 UTF-8 读取，也支持 `hex:`、`base64:`、`utf8:` 前缀。正式构建前必须填入当前环境的 `protocol.key` 和 `protocol.iv`；项目通过 `.env.development` 将 `npm run dev` 固定为 `mock` 模式，因此本地联调不会因缺少线上密钥阻塞登录。`npm run build` 使用 `online` 模式，不读取开发配置，学生占用和设备占用仍以正式服务端 `code/flag` 为准。
+正式环境通过 ZERO 注入的 `chrome.account360.OnEncryptValue` 加密业务 JSON，并将返回值作为 `jb` 提交，因此无需也不应在前端配置 `protocol.key` / `protocol.iv`。项目通过 `.env.development` 将 `npm run dev` 固定为 `mock` 模式；如需联调真实接口，请在支持该原生加密能力的 ZERO 浏览器内，以 production 模式打开页面。学生占用和设备占用仍以正式服务端 `code/flag` 为准。
 
 ## ZERO 浏览器能力
 

@@ -20,10 +20,15 @@ interface AiEduPlainPayload {
 interface AiEduApiOptions {
   apiMode?: 'mock' | 'production';
   apiUrl?: string;
-  protocolKey?: string;
-  protocolIv?: string;
+  encryptor?: AiEduEncryptor;
   fetcher?: typeof fetch;
   now?: () => number;
+}
+
+type AiEduEncryptor = (plainText: string) => Promise<string>;
+
+interface ZeroAccount360Api {
+  OnEncryptValue?: (value: string, callback: (encryptedValue: unknown) => void) => void;
 }
 
 export class AiEduApiError extends Error {
@@ -74,58 +79,60 @@ export function normalizeAiEduPayload(
   return normalized;
 }
 
-function decodeBase64(value: string) {
-  try {
-    const binary = atob(value);
-    return Uint8Array.from(binary, (character) => character.charCodeAt(0));
-  } catch (error) {
-    throw new AiEduConfigurationError('V8 加密协议配置格式错误', { cause: error });
-  }
+function getZeroAccountApi() {
+  return (globalThis as typeof globalThis & {
+    chrome?: { account360?: ZeroAccount360Api };
+  }).chrome?.account360;
 }
 
-function decodeProtocolValue(value: string | undefined, label: string) {
-  const configured = value?.trim();
-  if (!configured) throw new AiEduConfigurationError(`缺少 ${label} 配置`);
-  if (configured.startsWith('hex:')) {
-    const hex = configured.slice(4);
-    if (!hex || hex.length % 2 !== 0 || !/^[\da-f]+$/i.test(hex)) {
-      throw new AiEduConfigurationError(`${label} 的 hex 配置无效`);
-    }
-    return Uint8Array.from(hex.match(/.{2}/g) ?? [], (pair) => Number.parseInt(pair, 16));
-  }
-  if (configured.startsWith('base64:')) return decodeBase64(configured.slice(7));
-  if (configured.startsWith('utf8:')) return new TextEncoder().encode(configured.slice(5));
-  return new TextEncoder().encode(configured);
-}
-
-function bytesToBase64(bytes: Uint8Array) {
-  let binary = '';
-  for (const byte of bytes) binary += String.fromCharCode(byte);
-  return btoa(binary);
-}
-
-export async function encryptV8Payload(
-  payload: object,
-  protocolKey: string | undefined,
-  protocolIv: string | undefined,
+/**
+ * 复用 ZERO 客户端内置的 V8 加密能力。密钥由客户端安全能力维护，
+ * 不再把 protocol.key / protocol.iv 打包进活动页 JavaScript。
+ */
+export function encryptWithZeroAccount(
+  plainText: string,
+  accountApi: ZeroAccount360Api | undefined = getZeroAccountApi(),
+  timeoutMs = 8_000,
 ) {
-  const keyBytes = decodeProtocolValue(protocolKey, 'V8 protocol.key');
-  const ivBytes = decodeProtocolValue(protocolIv, 'V8 protocol.iv');
-  if (![16, 24, 32].includes(keyBytes.length)) {
-    throw new AiEduConfigurationError('V8 protocol.key 必须是 16、24 或 32 字节');
+  const encrypt = accountApi?.OnEncryptValue;
+  if (typeof encrypt !== 'function') {
+    return Promise.reject(new AiEduConfigurationError(
+      '当前 ZERO 浏览器不支持登录加密，请升级到最新版后重试',
+    ));
   }
-  if (ivBytes.length !== 16) throw new AiEduConfigurationError('V8 protocol.iv 必须是 16 字节');
-  if (!globalThis.crypto?.subtle) throw new AiEduApiError('当前浏览器不支持 V8 加密协议');
 
-  try {
-    const key = await globalThis.crypto.subtle.importKey('raw', keyBytes, { name: 'AES-CBC' }, false, ['encrypt']);
-    const plain = new TextEncoder().encode(JSON.stringify(payload));
-    const encrypted = await globalThis.crypto.subtle.encrypt({ name: 'AES-CBC', iv: ivBytes }, key, plain);
-    return bytesToBase64(new Uint8Array(encrypted));
-  } catch (error) {
-    if (error instanceof AiEduApiError) throw error;
-    throw new AiEduApiError('生成学生信息加密参数失败', undefined, undefined, { cause: error });
-  }
+  return new Promise<string>((resolve, reject) => {
+    let settled = false;
+    const timer = globalThis.setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      reject(new AiEduApiError('登录加密超时，请重新提交'));
+    }, timeoutMs);
+
+    try {
+      encrypt.call(accountApi, plainText, (encryptedValue) => {
+        if (settled) return;
+        settled = true;
+        globalThis.clearTimeout(timer);
+        if (typeof encryptedValue !== 'string' || !encryptedValue.trim()) {
+          reject(new AiEduApiError('生成学生信息加密参数失败，请重试'));
+          return;
+        }
+        resolve(encryptedValue.trim());
+      });
+    } catch (error) {
+      settled = true;
+      globalThis.clearTimeout(timer);
+      reject(new AiEduApiError('生成学生信息加密参数失败，请重试', undefined, undefined, { cause: error }));
+    }
+  });
+}
+
+export function encryptV8Payload(
+  payload: object,
+  encryptor: AiEduEncryptor = encryptWithZeroAccount,
+) {
+  return encryptor(JSON.stringify(payload));
 }
 
 export function getAiEduErrorMessage(response: Pick<AiEduAddResponse, 'code' | 'flag' | 'msg'>) {
@@ -158,18 +165,14 @@ function isAiEduResponse(value: unknown): value is AiEduAddResponse {
 
 export async function addAiEduStudent(payload: StudentLoginPayload, options: AiEduApiOptions = {}) {
   const plain = normalizeAiEduPayload(payload, options.now);
-  // 本地开发默认使用 mock，避免开发机因未持有线上 protocol.key/iv 而无法打开页面。
-  // 如需在本地联调真实接口，请显式设置 VITE_AI_EDU_API_MODE=production 并提供密钥配置。
+  // 普通浏览器没有 ZERO 原生加密能力，因此开发环境默认使用 mock。
+  // 正式环境由 chrome.account360.OnEncryptValue 生成接口要求的 jb。
   const mode = options.apiMode
     ?? import.meta.env.VITE_AI_EDU_API_MODE
     ?? (import.meta.env.DEV ? 'mock' : 'production');
   if (mode === 'mock') return { code: 0, msg: 'ok', data: {}, flag: 0 } satisfies AiEduAddResponse;
 
-  const jb = await encryptV8Payload(
-    plain,
-    options.protocolKey ?? import.meta.env.VITE_V8_PROTOCOL_KEY,
-    options.protocolIv ?? import.meta.env.VITE_V8_PROTOCOL_IV,
-  );
+  const jb = await encryptV8Payload(plain, options.encryptor);
   const requestBody = new URLSearchParams({ jb });
   let response: Response;
   try {
