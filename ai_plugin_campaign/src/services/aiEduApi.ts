@@ -38,6 +38,13 @@ export class AiEduApiError extends Error {
   }
 }
 
+export class AiEduConfigurationError extends AiEduApiError {
+  constructor(message: string, options: { cause?: unknown } = {}) {
+    super(message, undefined, undefined, options);
+    this.name = 'AiEduConfigurationError';
+  }
+}
+
 function characterLength(value: string) {
   return Array.from(value).length;
 }
@@ -72,17 +79,17 @@ function decodeBase64(value: string) {
     const binary = atob(value);
     return Uint8Array.from(binary, (character) => character.charCodeAt(0));
   } catch (error) {
-    throw new AiEduApiError('V8 加密协议配置格式错误', undefined, undefined, { cause: error });
+    throw new AiEduConfigurationError('V8 加密协议配置格式错误', { cause: error });
   }
 }
 
 function decodeProtocolValue(value: string | undefined, label: string) {
   const configured = value?.trim();
-  if (!configured) throw new AiEduApiError(`缺少 ${label} 配置，请联系活动管理员`);
+  if (!configured) throw new AiEduConfigurationError(`缺少 ${label} 配置`);
   if (configured.startsWith('hex:')) {
     const hex = configured.slice(4);
     if (!hex || hex.length % 2 !== 0 || !/^[\da-f]+$/i.test(hex)) {
-      throw new AiEduApiError(`${label} 的 hex 配置无效`);
+      throw new AiEduConfigurationError(`${label} 的 hex 配置无效`);
     }
     return Uint8Array.from(hex.match(/.{2}/g) ?? [], (pair) => Number.parseInt(pair, 16));
   }
@@ -105,9 +112,9 @@ export async function encryptV8Payload(
   const keyBytes = decodeProtocolValue(protocolKey, 'V8 protocol.key');
   const ivBytes = decodeProtocolValue(protocolIv, 'V8 protocol.iv');
   if (![16, 24, 32].includes(keyBytes.length)) {
-    throw new AiEduApiError('V8 protocol.key 必须是 16、24 或 32 字节');
+    throw new AiEduConfigurationError('V8 protocol.key 必须是 16、24 或 32 字节');
   }
-  if (ivBytes.length !== 16) throw new AiEduApiError('V8 protocol.iv 必须是 16 字节');
+  if (ivBytes.length !== 16) throw new AiEduConfigurationError('V8 protocol.iv 必须是 16 字节');
   if (!globalThis.crypto?.subtle) throw new AiEduApiError('当前浏览器不支持 V8 加密协议');
 
   try {

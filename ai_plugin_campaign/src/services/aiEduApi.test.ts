@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { StudentLoginPayload } from '../types';
 import {
   addAiEduStudent,
+  AiEduConfigurationError,
   AiEduApiError,
   encryptV8Payload,
   getAiEduErrorMessage,
@@ -31,6 +32,14 @@ describe('AI education student API', () => {
   it('rejects an invalid MID before sending the request', () => {
     expect(() => normalizeAiEduPayload({ ...student, deviceId: 'short-mid' })).toThrow(AiEduApiError);
     expect(() => normalizeAiEduPayload({ ...student, deviceId: '中文设备编号中文设备编号中文设备编号中文设备编号' })).toThrow('设备 ID 无效');
+  });
+
+  it('identifies missing production encryption settings as configuration errors', async () => {
+    await expect(addAiEduStudent(student, {
+      apiMode: 'production',
+      protocolKey: '',
+      protocolIv: '',
+    })).rejects.toBeInstanceOf(AiEduConfigurationError);
   });
 
   it('creates Base64 AES-CBC data that decrypts back to the original JSON', async () => {

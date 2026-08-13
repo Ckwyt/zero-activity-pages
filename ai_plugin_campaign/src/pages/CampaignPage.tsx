@@ -9,7 +9,7 @@ import { RulesModal } from '../components/RulesModal';
 import { StudentLoginModal } from '../components/StudentLoginModal';
 import { SubmissionEndedModal } from '../components/SubmissionEndedModal';
 import { activityLinks, competitionConfig } from '../data/activity';
-import { addAiEduStudent } from '../services/aiEduApi';
+import { addAiEduStudent, AiEduConfigurationError } from '../services/aiEduApi';
 import {
   markProgress,
   readCampaignSession,
@@ -100,6 +100,10 @@ export function CampaignPage() {
       await addAiEduStudent(payload);
       next = saveStudent(payload, { allowExisting: true });
     } catch (error) {
+      if (error instanceof AiEduConfigurationError) {
+        console.error('[AI EDU] 学生登录接口配置错误：', error.message);
+        return '登录服务暂不可用，请联系活动管理员。';
+      }
       return error instanceof Error ? error.message : '登录失败，请重试。';
     }
     setSession(next);

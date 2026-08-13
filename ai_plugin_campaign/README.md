@@ -29,6 +29,18 @@ npm run build
 
 生产入口：`dist/ai-plugin-campaign.html`。
 
+## 构建并发布到 ZERO CDN
+
+参考 ZERO 扩展中心项目的上传方式，在已安装并登录 `qupload` 的环境中执行：
+
+```bash
+npm run build:deploy
+```
+
+该命令会依次完成在线构建、图片资源兼容处理、清空旧 `output/`、通过
+`qupload --inline-css --host-zero ./dist/` 上传资源，并校验 CDN JavaScript 中不存在本地图片路径或相对 JS 分包。
+成功后入口文件为 `output/ai-plugin-campaign.html`。
+
 ## 页面入口
 
 - `/`：活动主页面；
@@ -57,7 +69,7 @@ npm run build
 - `VITE_V8_PROTOCOL_KEY`；
 - `VITE_V8_PROTOCOL_IV`。
 
-密钥和 IV 默认按 UTF-8 读取，也支持 `hex:`、`base64:`、`utf8:` 前缀。正式构建前必须填入当前环境的 `protocol.key` 和 `protocol.iv`；本地只验证 UI 时可使用 `mock` 模式。学生占用和设备占用均以服务端 `code/flag` 为准。
+密钥和 IV 默认按 UTF-8 读取，也支持 `hex:`、`base64:`、`utf8:` 前缀。正式构建前必须填入当前环境的 `protocol.key` 和 `protocol.iv`；项目通过 `.env.development` 将 `npm run dev` 固定为 `mock` 模式，因此本地联调不会因缺少线上密钥阻塞登录。`npm run build` 使用 `online` 模式，不读取开发配置，学生占用和设备占用仍以正式服务端 `code/flag` 为准。
 
 ## ZERO 浏览器能力
 
