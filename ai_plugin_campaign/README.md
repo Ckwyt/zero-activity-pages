@@ -56,8 +56,8 @@ npm run build:deploy
 
 指定 `stage` 后会自动切换至作品赛道；`showcase` 和 `awards` 在学生登录后会自动定位到作品列表。移除 `stage` 参数即可恢复按真实赛事日期判断。
 
-点击“确认登录”后，页面先通过 V8 AES-CBC 协议调用
-`POST https://user.zbrowser.cn/v8/ai/edu/add`；只有接口返回 `code=0, flag=0` 后，才会保存学生资料并触发 ZERO 账号登录。学生资料及任务进度保存在以下 `localStorage` 键：
+点击“确认登录”后，页面通过 V1 明文免登录协议调用
+`POST https://user.zbrowser.cn/v1/ai/edu/add`，将学生信息 JSON 字符串写入表单字段 `jb`。只有接口返回 `code=0, flag=0` 后，才会保存学生资料并触发 ZERO 账号登录。学生资料及任务进度保存在以下 `localStorage` 键：
 
 - `zero.ai-plugin-campaign.session.v1`
 - `zero.ai-plugin-campaign.users.v1`
@@ -67,7 +67,7 @@ npm run build:deploy
 - `VITE_AI_EDU_API_MODE=production|mock`；
 - `VITE_AI_EDU_ADD_URL`。
 
-正式环境通过 ZERO 注入的 `chrome.account360.OnEncryptValue` 加密业务 JSON，并将返回值作为 `jb` 提交，因此无需也不应在前端配置 `protocol.key` / `protocol.iv`。项目通过 `.env.development` 将 `npm run dev` 固定为 `mock` 模式；如需联调真实接口，请在支持该原生加密能力的 ZERO 浏览器内，以 production 模式打开页面。学生占用和设备占用仍以正式服务端 `code/flag` 为准。
+V1 接口不经过 AES/Base64，也不依赖 `chrome.account360` 或 `window.external.AppCmd` 加密能力。项目通过 `.env.development` 将 `npm run dev` 固定为 `mock` 模式；如需本地联调真实接口，可将模式显式设为 `production`。学生占用和设备占用仍以正式服务端 `code/flag` 为准。
 
 ## ZERO 浏览器能力
 

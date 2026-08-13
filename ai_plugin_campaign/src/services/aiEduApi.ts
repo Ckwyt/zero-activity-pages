@@ -1,6 +1,6 @@
 import type { StudentLoginPayload } from '../types';
 
-export const AI_EDU_ADD_URL = 'https://user.zbrowser.cn/v8/ai/edu/add';
+export const AI_EDU_ADD_URL = 'https://user.zbrowser.cn/v1/ai/edu/add';
 
 export interface AiEduAddResponse {
   code: number;
@@ -20,15 +20,8 @@ interface AiEduPlainPayload {
 interface AiEduApiOptions {
   apiMode?: 'mock' | 'production';
   apiUrl?: string;
-  encryptor?: AiEduEncryptor;
   fetcher?: typeof fetch;
   now?: () => number;
-}
-
-type AiEduEncryptor = (plainText: string) => Promise<string>;
-
-interface ZeroAccount360Api {
-  OnEncryptValue?: (value: string, callback: (encryptedValue: unknown) => void) => void;
 }
 
 export class AiEduApiError extends Error {
@@ -40,13 +33,6 @@ export class AiEduApiError extends Error {
   ) {
     super(message, options.cause === undefined ? undefined : { cause: options.cause });
     this.name = 'AiEduApiError';
-  }
-}
-
-export class AiEduConfigurationError extends AiEduApiError {
-  constructor(message: string, options: { cause?: unknown } = {}) {
-    super(message, undefined, undefined, options);
-    this.name = 'AiEduConfigurationError';
   }
 }
 
@@ -79,71 +65,12 @@ export function normalizeAiEduPayload(
   return normalized;
 }
 
-function getZeroAccountApi() {
-  return (globalThis as typeof globalThis & {
-    chrome?: { account360?: ZeroAccount360Api };
-  }).chrome?.account360;
-}
-
-/**
- * 复用 ZERO 客户端内置的 V8 加密能力。密钥由客户端安全能力维护，
- * 不再把 protocol.key / protocol.iv 打包进活动页 JavaScript。
- */
-export function encryptWithZeroAccount(
-  plainText: string,
-  accountApi: ZeroAccount360Api | undefined = getZeroAccountApi(),
-  timeoutMs = 8_000,
-) {
-  const encrypt = accountApi?.OnEncryptValue;
-  if (typeof encrypt !== 'function') {
-    return Promise.reject(new AiEduConfigurationError(
-      '当前 ZERO 浏览器不支持登录加密，请升级到最新版后重试',
-    ));
-  }
-
-  return new Promise<string>((resolve, reject) => {
-    let settled = false;
-    const timer = globalThis.setTimeout(() => {
-      if (settled) return;
-      settled = true;
-      reject(new AiEduApiError('登录加密超时，请重新提交'));
-    }, timeoutMs);
-
-    try {
-      encrypt.call(accountApi, plainText, (encryptedValue) => {
-        if (settled) return;
-        settled = true;
-        globalThis.clearTimeout(timer);
-        if (typeof encryptedValue !== 'string' || !encryptedValue.trim()) {
-          reject(new AiEduApiError('生成学生信息加密参数失败，请重试'));
-          return;
-        }
-        resolve(encryptedValue.trim());
-      });
-    } catch (error) {
-      settled = true;
-      globalThis.clearTimeout(timer);
-      reject(new AiEduApiError('生成学生信息加密参数失败，请重试', undefined, undefined, { cause: error }));
-    }
-  });
-}
-
-export function encryptV8Payload(
-  payload: object,
-  encryptor: AiEduEncryptor = encryptWithZeroAccount,
-) {
-  return encryptor(JSON.stringify(payload));
-}
-
 export function getAiEduErrorMessage(response: Pick<AiEduAddResponse, 'code' | 'flag' | 'msg'>) {
   const knownMessages: Record<string, string> = {
+    '3:0': '学生信息格式不正确，请检查后重试',
     '6:5': '该学生信息已被其他设备占用',
     '6:6': '当前设备已绑定其他学生信息',
     '9:10': '登录请求已过期，请重新提交',
-    '9:11': '学生信息加密参数缺失，请联系活动管理员',
-    '9:12': '学生信息加密参数格式错误，请联系活动管理员',
-    '9:13': '学生信息解密失败，请联系活动管理员',
-    '9:20': '学生信息不符合要求，请检查后重试',
     '9:3': '学生信息状态已变化，请重新提交',
     '13:8': '学生信息查询失败，请稍后重试',
     '13:9': '学生信息更新失败，请稍后重试',
@@ -165,15 +92,13 @@ function isAiEduResponse(value: unknown): value is AiEduAddResponse {
 
 export async function addAiEduStudent(payload: StudentLoginPayload, options: AiEduApiOptions = {}) {
   const plain = normalizeAiEduPayload(payload, options.now);
-  // 普通浏览器没有 ZERO 原生加密能力，因此开发环境默认使用 mock。
-  // 正式环境由 chrome.account360.OnEncryptValue 生成接口要求的 jb。
+  // 本地开发默认使用 mock；V1 正式接口直接接收明文 JSON 字符串，无需客户端加密。
   const mode = options.apiMode
     ?? import.meta.env.VITE_AI_EDU_API_MODE
     ?? (import.meta.env.DEV ? 'mock' : 'production');
   if (mode === 'mock') return { code: 0, msg: 'ok', data: {}, flag: 0 } satisfies AiEduAddResponse;
 
-  const jb = await encryptV8Payload(plain, options.encryptor);
-  const requestBody = new URLSearchParams({ jb });
+  const requestBody = new URLSearchParams({ jb: JSON.stringify(plain) });
   let response: Response;
   try {
     response = await (options.fetcher ?? fetch)(
