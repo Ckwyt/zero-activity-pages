@@ -4,10 +4,17 @@ import {
 } from '../services/browserEnvironment';
 import { useBrowserEnvironment } from '../state/BrowserEnvironmentContext';
 
+/**
+ * ZERO 门禁默认开启。只有本地调试等明确场景设置为 off 时才跳过，
+ * 避免环境变量缺失导致普通浏览器被意外放行。
+ */
+export function isZeroBrowserGateEnabled(configuredValue?: string) {
+  return configuredValue !== 'off';
+}
+
 export function ZeroBrowserGate({ children }: { children: ReactNode }) {
   const environment = useBrowserEnvironment();
-  // 当前关闭门禁弹窗；需要恢复时显式设置 VITE_ZERO_BROWSER_GATE=on。
-  const shouldEnforceGate = import.meta.env.VITE_ZERO_BROWSER_GATE === 'on';
+  const shouldEnforceGate = isZeroBrowserGateEnabled(import.meta.env.VITE_ZERO_BROWSER_GATE);
 
   if (!shouldEnforceGate || environment.canUseCampaignFeatures) return children;
 

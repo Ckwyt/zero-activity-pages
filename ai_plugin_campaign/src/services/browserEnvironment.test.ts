@@ -16,6 +16,13 @@ describe('ZERO browser environment detection', () => {
     });
   });
 
+  it('does not mistake an empty account360 object for ZERO', () => {
+    expect(detectBrowserEnvironment({ chrome: { account360: {} } })).toMatchObject({
+      isZeroBrowser: false,
+      canUseCampaignFeatures: false,
+    });
+  });
+
   it('compares dotted ZERO versions against the minimum', () => {
     expect(isZeroBrowserVersionSupported('2.0.1322.0')).toBe(true);
     expect(isZeroBrowserVersionSupported('2.0.1322.1')).toBe(true);
@@ -34,7 +41,7 @@ describe('ZERO browser environment detection', () => {
         GetMID: vi.fn(),
         GetVersion: vi.fn(() => '2.0.1322.0'),
       },
-      chrome: { account360: {} },
+      chrome: { account360: { getAccount: vi.fn() } },
     })).toEqual({
       isZeroBrowser: true,
       browserVersion: '2.0.1322.0',
@@ -64,7 +71,7 @@ describe('ZERO browser environment detection', () => {
   });
 
   it('recognizes ZERO account bridge when the version is unavailable', () => {
-    expect(detectBrowserEnvironment({ chrome: { account360: {} } })).toEqual({
+    expect(detectBrowserEnvironment({ chrome: { account360: { getAccount: vi.fn() } } })).toEqual({
       isZeroBrowser: true,
       browserVersion: '',
       isOutdatedZeroBrowser: false,

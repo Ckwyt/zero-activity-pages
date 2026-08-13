@@ -29,6 +29,20 @@ function hasFunction(record: Record<string, unknown> | undefined, key: string) {
   return typeof record?.[key] === 'function';
 }
 
+function hasAccount360Capability(account360: Record<string, unknown> | undefined) {
+  if (!account360) return false;
+  // 不能只判断对象是否存在：其他 Chromium 内核或页面脚本可能创建同名空对象。
+  return [
+    'getAccount',
+    'showLogin',
+    'login',
+    'openLoginPanel',
+    'showLoginPanel',
+    'getInstalledExtensions',
+    'onInstallExtension',
+  ].some((key) => hasFunction(account360, key));
+}
+
 function compareNumericVersionPart(left: string, right: string) {
   const normalizedLeft = left.replace(/^0+(?=\d)/, '');
   const normalizedRight = right.replace(/^0+(?=\d)/, '');
@@ -99,9 +113,9 @@ export function detectBrowserEnvironment(
   const canUseNativeNavigation = hasFunction(external, 'GetSID') && hasFunction(external, 'AppCmd');
   const canReadNativeIdentity = hasFunction(external, 'GetMID') && hasFunction(external, 'GetVersion');
   const browserVersion = readNativeBrowserVersion(external, globals.external);
-  const hasAccount360 = Boolean(account360);
+  const hasAccount360 = hasAccount360Capability(account360);
 
-  // 兼容较低版本：只有 GetSID/GetVersion，或只注入 account360 时，也可确认是 ZERO。
+  // 兼容较低版本：只有 GetSID/GetVersion，或注入了可调用的 account360 能力时，也可确认是 ZERO。
   const isZeroBrowser = canUseNativeNavigation
     || canReadNativeIdentity
     || hasAccount360
