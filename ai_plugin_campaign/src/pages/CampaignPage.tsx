@@ -26,7 +26,9 @@ import {
   openZeroUrl,
   requestZeroAccountLogin,
 } from '../services/zeroCampaignBridge';
-import type { CampaignTrackId, StudentLoginPayload } from '../types';
+import type { ActivityProgress, CampaignSession, CampaignTrackId, StudentLoginPayload } from '../types';
+
+const emptyCampaignSession: CampaignSession = { profile: null, progress: {} };
 
 function readTrack(): CampaignTrackId {
   const params = new URLSearchParams(window.location.search);
@@ -46,13 +48,14 @@ function readCompetitionStagePreview(params = new URLSearchParams(window.locatio
 }
 
 export function CampaignPage() {
-  const [session, setSession] = useState(readCampaignSession);
+  const deviceId = useMemo(getDeviceId, []);
+  const [session, setSession] = useState<CampaignSession>(emptyCampaignSession);
+  const [storageReady, setStorageReady] = useState(false);
   const [track, setTrack] = useState<CampaignTrackId>(readTrack);
   const [showRules, setShowRules] = useState(false);
   const [showCertificate, setShowCertificate] = useState(false);
   const [showSubmissionEnded, setShowSubmissionEnded] = useState(false);
   const [notice, setNotice] = useState('');
-  const deviceId = useMemo(getDeviceId, []);
   const unlocks = getLearningUnlocks(session.progress);
   const previewCompetitionStage = useMemo(readCompetitionStagePreview, []);
   const competitionStage = previewCompetitionStage ?? getCompetitionStage(
@@ -72,9 +75,34 @@ export function CampaignPage() {
   }[competitionStage] as [string, boolean, boolean];
 
   useEffect(() => {
+    let active = true;
+    readCampaignSession(deviceId)
+      .then((storedSession) => {
+        if (active) setSession(storedSession);
+      })
+      .catch((error) => {
+        console.error('[Campaign Storage] 读取本地活动数据失败：', error);
+        if (active) setNotice('本地活动数据读取失败，请重新登录。');
+      })
+      .finally(() => {
+        if (active) setStorageReady(true);
+      });
+    return () => {
+      active = false;
+    };
+  }, [deviceId]);
+
+  useEffect(() => {
+    function persistEventProgress(key: keyof ActivityProgress) {
+      void markProgress(deviceId, key)
+        .then(setSession)
+        .catch((error) => {
+          console.error('[Campaign Storage] 保存活动进度失败：', error);
+          setNotice('活动进度保存失败，请重试。');
+        });
+    }
     function onFirstAiInteraction() {
-      const next = markProgress('firstAiInteractionAt');
-      setSession(next);
+      persistEventProgress('firstAiInteractionAt');
     }
     function onExperienceCompleted(event: Event) {
       const action = (event as CustomEvent<{ action?: string }>).detail?.action;
@@ -83,8 +111,8 @@ export function CampaignPage() {
         skin: 'skinCompletedAt',
         pdf: 'pdfCompletedAt',
         drive: 'driveCompletedAt',
-      }[action ?? ''] as Parameters<typeof markProgress>[0] | undefined;
-      if (key) setSession(markProgress(key));
+      }[action ?? ''] as keyof ActivityProgress | undefined;
+      if (key) persistEventProgress(key);
     }
     window.addEventListener('zero-campaign:first-ai-interaction', onFirstAiInteraction);
     window.addEventListener('zero-campaign:experience-completed', onExperienceCompleted);
@@ -92,13 +120,13 @@ export function CampaignPage() {
       window.removeEventListener('zero-campaign:first-ai-interaction', onFirstAiInteraction);
       window.removeEventListener('zero-campaign:experience-completed', onExperienceCompleted);
     };
-  }, []);
+  }, [deviceId]);
 
   async function login(payload: StudentLoginPayload) {
     let next;
     try {
       await addAiEduStudent(payload);
-      next = saveStudent(payload, { allowExisting: true });
+      next = await saveStudent(payload, { allowExisting: true });
     } catch (error) {
       return error instanceof Error ? error.message : '登录失败，请重试。';
     }
@@ -108,19 +136,26 @@ export function CampaignPage() {
     return null;
   }
 
-  function updateProgress(key: Parameters<typeof markProgress>[0]) {
-    const next = markProgress(key);
-    setSession(next);
+  async function updateProgress(key: keyof ActivityProgress) {
+    try {
+      const next = await markProgress(deviceId, key);
+      setSession(next);
+      return true;
+    } catch (error) {
+      console.error('[Campaign Storage] 保存活动进度失败：', error);
+      setNotice('活动进度保存失败，请重试。');
+      return false;
+    }
   }
 
   async function learn() {
-    updateProgress('courseOpenedAt');
+    if (!await updateProgress('courseOpenedAt')) return;
     dispatchZeroCampaignAction('course-opened', { mode: 'interaction' });
     await openZeroUrl(activityLinks.course);
   }
 
   function mockAiInteraction() {
-    updateProgress('firstAiInteractionAt');
+    void updateProgress('firstAiInteractionAt');
     dispatchZeroCampaignAction('first-ai-interaction');
   }
 
@@ -133,7 +168,7 @@ export function CampaignPage() {
       summary: [activityLinks.summary, 'summaryCompletedAt'],
     } as const;
     const [url, progressKey] = actionConfig[action];
-    updateProgress(progressKey);
+    if (!await updateProgress(progressKey)) return;
     dispatchZeroCampaignAction(action, action === 'summary' ? { enterAiSummary: true } : {});
     try {
       await openZeroUrl(url);
@@ -163,13 +198,13 @@ export function CampaignPage() {
   }
 
   function generateCertificate() {
-    updateProgress('certificateGeneratedAt');
+    void updateProgress('certificateGeneratedAt');
     dispatchZeroCampaignAction('certificate-generated');
   }
 
   return (
     <div className={`campaign-app campaign-app--${track}`}>
-      <div className="campaign-content" inert={session.profile ? undefined : true}>
+      <div className="campaign-content" inert={storageReady && session.profile ? undefined : true}>
         <CampaignHeader activeTrack={track} onChange={setTrack} />
         <Hero
           track={track}
@@ -202,7 +237,7 @@ export function CampaignPage() {
         )}
       </div>
 
-      {!session.profile ? <StudentLoginModal deviceId={deviceId} onSubmit={login} /> : null}
+      {storageReady && !session.profile ? <StudentLoginModal deviceId={deviceId} onSubmit={login} /> : null}
       {showRules ? <RulesModal onClose={() => setShowRules(false)} /> : null}
       {showSubmissionEnded ? (
         <SubmissionEndedModal onClose={() => setShowSubmissionEnded(false)} />

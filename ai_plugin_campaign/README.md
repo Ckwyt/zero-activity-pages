@@ -62,6 +62,8 @@ npm run build:deploy
 - `zero.ai-plugin-campaign.session.v1`
 - `zero.ai-plugin-campaign.users.v1`
 
+以上两个键使用由当前设备 ID 派生的 AES-256-GCM 密钥加密保存，每次写入使用随机 IV。旧版明文会话和学生列表会在页面首次初始化时自动迁移为密文；认证标签校验失败时不会使用被篡改的数据。
+
 接口配置参考 `.env.example`：
 
 - `VITE_AI_EDU_API_MODE=production|mock`；
@@ -83,6 +85,8 @@ ZERO 原生业务动作集中在 `src/services/zeroCampaignBridge.ts`。页面�
 
 - `zero-campaign:action`
 - `zero-campaign:request-account-login`
+
+账号状态可通过 `getZeroAccountLoginStatus()` 主动查询，返回 `logged-in | logged-out | unavailable`；其中 `unavailable` 表示当前网页无法访问 ZERO 的 `chrome.account360.getAccount` 能力，不能等同于未登录。客户端通过 `loginStatusUpdate(QT)` 主动通知状态变化时，可使用 `isZeroAccountQtLoggedIn(QT)` 判断 QT 是否有效。
 
 浏览器侧完成首次 AI 对话时应向页面派发 `zero-campaign:first-ai-interaction`；搜索、换肤、PDF、网盘完成时派发 `zero-campaign:experience-completed`，并在 `detail.action` 中传入 `search | skin | pdf | drive`。
 
