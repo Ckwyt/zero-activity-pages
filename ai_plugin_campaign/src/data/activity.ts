@@ -14,12 +14,18 @@ export const schools = [
 ];
 
 export const activityLinks = {
-  course: import.meta.env.VITE_COURSE_URL || 'https://space.bilibili.com/',
-  drive: import.meta.env.VITE_DRIVE_URL || 'https://www.zbrowser.cn/',
-  search: import.meta.env.VITE_SEARCH_URL || 'zero://newtab/',
-  skin: import.meta.env.VITE_SKIN_URL || 'zero://theme/',
-  pdf: import.meta.env.VITE_PDF_URL || 'https://www.zbrowser.cn/',
-  summary: import.meta.env.VITE_SUMMARY_COURSE_URL || 'https://space.bilibili.com/',
+  course: import.meta.env.VITE_COURSE_URL
+    || 'https://www.bilibili.com/video/BV1QruC6iEWA/?spm_id_from=333.1007.tianma.1-1-1.click&assistant_action=course_submit',
+  drive: import.meta.env.VITE_DRIVE_URL
+    || 'https://www.zbrowser.cn/share/?s=1fSSWYKnmM1qLUKrfxGjHL',
+  search: import.meta.env.VITE_SEARCH_URL
+    || 'zero://newtab?openSearchEngine=1',
+  skin: import.meta.env.VITE_SKIN_URL
+    || 'zero://newtab?openSearchEngine=2',
+  pdf: import.meta.env.VITE_PDF_URL
+    || 'https://dnf999.neocities.org/%E6%B5%8B%E8%AF%95.pdf?assistant_action=advanced_feature',
+  summary: import.meta.env.VITE_SUMMARY_COURSE_URL
+    || 'https://www.bilibili.com/video/BV1QruC6iEWA/?spm_id_from=333.1007.tianma.1-1-1.click&assistant_action=course_finish',
   pluginGenerator: import.meta.env.VITE_PLUGIN_GENERATOR_URL || 'https://www.zbrowser.cn/PluginHub/',
   showcase: import.meta.env.VITE_SHOWCASE_URL || '#showcase',
 };
