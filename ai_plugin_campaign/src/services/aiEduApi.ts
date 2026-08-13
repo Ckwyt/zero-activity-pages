@@ -158,7 +158,11 @@ function isAiEduResponse(value: unknown): value is AiEduAddResponse {
 
 export async function addAiEduStudent(payload: StudentLoginPayload, options: AiEduApiOptions = {}) {
   const plain = normalizeAiEduPayload(payload, options.now);
-  const mode = options.apiMode ?? import.meta.env.VITE_AI_EDU_API_MODE ?? 'production';
+  // 本地开发默认使用 mock，避免开发机因未持有线上 protocol.key/iv 而无法打开页面。
+  // 如需在本地联调真实接口，请显式设置 VITE_AI_EDU_API_MODE=production 并提供密钥配置。
+  const mode = options.apiMode
+    ?? import.meta.env.VITE_AI_EDU_API_MODE
+    ?? (import.meta.env.DEV ? 'mock' : 'production');
   if (mode === 'mock') return { code: 0, msg: 'ok', data: {}, flag: 0 } satisfies AiEduAddResponse;
 
   const jb = await encryptV8Payload(

@@ -21,7 +21,7 @@ export const activityLinks = {
   search: import.meta.env.VITE_SEARCH_URL
     || 'zero://newtab?openSearchEngine=1',
   skin: import.meta.env.VITE_SKIN_URL
-    || 'zero://newtab?openSearchEngine=2',
+    || 'zero://newtab/?floor=skin',
   pdf: import.meta.env.VITE_PDF_URL
     || 'https://dnf999.neocities.org/%E6%B5%8B%E8%AF%95.pdf?assistant_action=advanced_feature',
   summary: import.meta.env.VITE_SUMMARY_COURSE_URL

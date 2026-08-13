@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { ActivityProgress } from '../types';
 
+// 活动联调期间暂时开放所有学习任务入口；需要恢复解锁限制时改为 true。
+const LEARNING_BUTTON_GATES_ENABLED = false;
+
 function GradientButton({
   children,
   disabled,
@@ -87,9 +90,9 @@ export function LearningTrack({
             <h2>一键转存，长期学习</h2>
             <p>浏览器内置 100G 网盘，课件文献网课视频统一存储，多端随取</p>
             <GradientButton
-              disabled={!dayTwoUnlocked}
+              disabled={LEARNING_BUTTON_GATES_ENABLED && !dayTwoUnlocked}
               completed={Boolean(progress.driveCompletedAt)}
-              title={!dayTwoUnlocked ? waitingText : undefined}
+              title={LEARNING_BUTTON_GATES_ENABLED && !dayTwoUnlocked ? waitingText : undefined}
               onClick={() => onAction('drive')}
             >去保存</GradientButton>
           </div>
@@ -134,7 +137,7 @@ export function LearningTrack({
               title="AI搜索"
               description="一个搜索框，一键切换六大搜索引擎——AI搜索、豆包AI搜索、百度、Microsoft Bing、Google。写论文用学术、查资讯用综合、要答案用AI，各取所需，省内存又高效，全程无广告。"
               button="去搜索"
-              disabled={!dayTwoUnlocked}
+              disabled={LEARNING_BUTTON_GATES_ENABLED && !dayTwoUnlocked}
               completed={Boolean(progress.searchCompletedAt)}
               onClick={() => onAction('search')}
             />
@@ -142,7 +145,7 @@ export function LearningTrack({
               title="AI换肤"
               description="一句话生成专属浏览器主题皮肤，开启个性化美学体验。"
               button="去换肤"
-              disabled={!dayTwoUnlocked}
+              disabled={LEARNING_BUTTON_GATES_ENABLED && !dayTwoUnlocked}
               completed={Boolean(progress.skinCompletedAt)}
               onClick={() => onAction('skin')}
             />
@@ -150,7 +153,7 @@ export function LearningTrack({
               title="PDF 全能工具"
               description="免费格式转换、双语对照翻译、AI 文档总结，一键生成思维导图，PDF 常用操作一站完成。"
               button="去体验"
-              disabled={!dayTwoUnlocked}
+              disabled={LEARNING_BUTTON_GATES_ENABLED && !dayTwoUnlocked}
               completed={Boolean(progress.pdfCompletedAt)}
               onClick={() => onAction('pdf')}
             />
@@ -168,9 +171,9 @@ export function LearningTrack({
           <span>第 8 天｜深度思考 AI 主题互动</span>
           <p>参与者登录 ZERO 浏览器活动专题，使用内置 AI 助手功能，围绕主题开展深度交流：自主提出人工智能在未来学习、校园生活、就业择业、创新创业领域能够落地的应用方向 / 场景设想，与 AI 进行对话探讨，保存完整互动截图。</p>
           <GradientButton
-            disabled={!dayEightUnlocked}
+            disabled={LEARNING_BUTTON_GATES_ENABLED && !dayEightUnlocked}
             completed={Boolean(progress.summaryCompletedAt)}
-            title={!dayEightUnlocked ? '完成首次 AI 对话后的第 8 天解锁' : undefined}
+            title={LEARNING_BUTTON_GATES_ENABLED && !dayEightUnlocked ? '完成首次 AI 对话后的第 8 天解锁' : undefined}
             onClick={() => onAction('summary')}
           >去学习并总结</GradientButton>
         </div>
@@ -181,7 +184,12 @@ export function LearningTrack({
           <h2>证书申领</h2>
           <p>成功完成 <strong>【第 1 天课程学习 + 课程相关 AI 问答互动】+【第 8 天 AI 场景畅想互动】</strong> 两项基础任务，核验材料无误后，即可在 ZERO 浏览器活动专题页面领取官方学习证明。</p>
           <small>补充说明：第 2–7 天拓展内容鼓励学习，但不作为领取证书的必备条件，兼顾学习深度与参与门槛。</small>
-          <button className="pill-button pill-button--white" type="button" disabled={!certificateUnlocked} onClick={onCertificate}>
+          <button
+            className="pill-button pill-button--white"
+            type="button"
+            disabled={LEARNING_BUTTON_GATES_ENABLED && !certificateUnlocked}
+            onClick={onCertificate}
+          >
             {progress.certificateGeneratedAt ? '查看学习证明' : '领取学习证明'}
           </button>
         </div>
