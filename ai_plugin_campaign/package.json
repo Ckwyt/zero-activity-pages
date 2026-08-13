@@ -1,0 +1,29 @@
+{
+  "name": "zero-ai-plugin-campaign",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --config vite.config.ts --host 127.0.0.1",
+    "build": "tsc -b && vite build --config vite.config.ts --mode online && node scripts/prepare-online-build.mjs && node scripts/verify-build.mjs",
+    "build:server": "tsc -b && vite build --config vite.config.ts",
+    "preview": "vite preview --config vite.config.ts --host 127.0.0.1",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-router-dom": "^7.18.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.3",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.4",
+    "jsdom": "^29.1.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.1.5",
+    "vitest": "^4.1.10"
+  }
+}

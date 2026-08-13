@@ -1,0 +1,68 @@
+- generic [ref=f3e4]:
+  - banner [ref=f3e5]:
+    - navigation "活动赛道" [ref=f3e6]:
+      - button "普惠学习体验赛道" [ref=f3e7] [cursor=pointer]
+      - button "AI 插件创意作品征集赛道" [ref=f3e8] [cursor=pointer]
+  - generic [ref=f3e10]:
+    - heading "智启青年・洞见 AI 未来" [level=1] [ref=f3e11]
+    - paragraph [ref=f3e12]: 把握人工智能时代机遇，直面产业变革挑战
+    - generic [ref=f3e13]: 普惠学习体验赛道｜AI 插件创意方案作品征集赛道
+    - button "AI 插件创意作品征集赛道" [ref=f3e14] [cursor=pointer]:
+      - text: AI 插件创意作品征集赛道
+      - generic [ref=f3e15]: →
+  - main [ref=f3e16]:
+    - generic [ref=f3e17]:
+      - generic [ref=f3e18]:
+        - heading "基础学习" [level=2] [ref=f3e19]
+        - generic [ref=f3e20]: 第 1 天｜基础学习启动
+        - paragraph [ref=f3e21]: 打开 ZERO 浏览器进入活动专题，完整学习线上主题课程，然后围绕课程知识点主动提问、交流探讨 （例如 AI 对本专业影响、就业变革、能力建设等相关问题），加深课程理解，留存互动页面截图。
+      - article [ref=f3e22]:
+        - heading "课程名称：《AI 浪潮下的产业变革：青年的机遇、挑战与成长路径》" [level=3] [ref=f3e23]
+        - heading "课程大纲：" [level=4] [ref=f3e24]
+        - list [ref=f3e25]:
+          - listitem [ref=f3e26]: 人工智能产业化现状，各行业智能化转型典型案例
+          - listitem [ref=f3e27]: AI 带来的时代机遇：创新载体、效率升级、青年就业与发展新方向
+          - listitem [ref=f3e28]: AI 引发的现实挑战：岗位迭代、能力竞争、AI 伦理与合规风险
+          - listitem [ref=f3e29]: 大学生应对策略：打造不可替代核心竞争力、科学合规使用 AI 工具
+          - listitem [ref=f3e30]: 青年数字素养培育指引
+        - button "去学习并互动" [ref=f3e32] [cursor=pointer]
+    - generic [ref=f3e34]:
+      - generic [ref=f3e35]:
+        - heading "一键转存，长期学习" [level=2] [ref=f3e36]
+        - paragraph [ref=f3e37]: 浏览器内置 100G 网盘，课件文献网课视频统一存储，多端随取
+        - button "去保存" [disabled] [ref=f3e38]
+      - img "ZERO 网盘课程资源转存界面" [ref=f3e39]
+    - generic [ref=f3e41]:
+      - generic [ref=f3e42]:
+        - heading "进阶体验" [level=2] [ref=f3e43]
+        - generic [ref=f3e44]: 第 2-7 天｜拓展内容一次性解锁
+      - generic [ref=f3e45]:
+        - article [ref=f3e46]:
+          - generic [ref=f3e47]:
+            - heading "AI搜索" [level=3] [ref=f3e48]
+            - paragraph [ref=f3e49]: 一个搜索框，一键切换六大搜索引擎——AI搜索、豆包AI搜索、百度、Microsoft Bing、Google。写论文用学术、查资讯用综合、要答案用AI，各取所需，省内存又高效，全程无广告。
+          - button "去搜索" [disabled] [ref=f3e50]
+        - article [ref=f3e51]:
+          - generic [ref=f3e52]:
+            - heading "AI换肤" [level=3] [ref=f3e53]
+            - paragraph [ref=f3e54]: 一句话生成专属浏览器主题皮肤，开启个性化美学体验。
+          - button "去换肤" [disabled] [ref=f3e55]
+        - article [ref=f3e56]:
+          - generic [ref=f3e57]:
+            - heading "PDF 全能工具" [level=3] [ref=f3e58]
+            - paragraph [ref=f3e59]: 免费格式转换、双语对照翻译、AI 文档总结，一键生成思维导图，PDF 常用操作一站完成。
+          - button "去体验" [disabled] [ref=f3e60]
+    - generic [ref=f3e62]:
+      - heading "学习总结" [level=2] [ref=f3e63]
+      - generic [ref=f3e64]: 倒计时：完成首次 AI 对话后开启
+      - generic [ref=f3e65]: 第 8 天｜深度思考 AI 主题互动
+      - paragraph [ref=f3e66]: 参与者登录 ZERO 浏览器活动专题，使用内置 AI 助手功能，围绕主题开展深度交流：自主提出人工智能在未来学习、校园生活、就业择业、创新创业领域能够落地的应用方向 / 场景设想，与 AI 进行对话探讨，保存完整互动截图。
+      - button "去学习并总结" [disabled] [ref=f3e67]
+    - generic [ref=f3e69]:
+      - heading "证书申领" [level=2] [ref=f3e70]
+      - paragraph [ref=f3e71]:
+        - text: 成功完成
+        - strong [ref=f3e72]: 【第 1 天课程学习 + 课程相关 AI 问答互动】+【第 8 天 AI 场景畅想互动】
+        - text: 两项基础任务，核验材料无误后，即可在 ZERO 浏览器活动专题页面领取官方学习证明。
+      - generic [ref=f3e73]: 补充说明：第 2–7 天拓展内容鼓励学习，但不作为领取证书的必备条件，兼顾学习深度与参与门槛。
+      - button "领取学习证明" [disabled] [ref=f3e74]

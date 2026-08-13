@@ -1,0 +1,120 @@
+- generic [ref=f2e4]:
+  - banner [ref=f2e5]:
+    - navigation "活动赛道" [ref=f2e6]:
+      - button "普惠学习体验赛道" [ref=f2e7] [cursor=pointer]
+      - button "AI 插件创意作品征集赛道" [ref=f2e8] [cursor=pointer]
+  - generic [ref=f2e10]:
+    - heading "智启青年・洞见 AI 未来" [level=1] [ref=f2e11]
+    - paragraph [ref=f2e12]: 把握人工智能时代机遇，直面产业变革挑战
+    - generic [ref=f2e13]: 普惠学习体验赛道｜AI 插件创意方案作品征集赛道
+    - button "上传作品" [ref=f2e14] [cursor=pointer]
+  - main [ref=f2e18]:
+    - button [ref=f2e19] [cursor=pointer]:
+      - generic [ref=f2e20]: 活动规则
+    - generic [ref=f2e21]:
+      - generic [ref=f2e22]:
+        - heading "征集主题" [level=2] [ref=f2e24]
+        - generic [ref=f2e25]:
+          - emphasis [ref=f2e26]: ‹
+          - text: THEME
+          - emphasis [ref=f2e27]: ›
+      - article [ref=f2e32]:
+        - paragraph [ref=f2e33]:
+          - text: 依托
+          - strong [ref=f2e34]: ZERO浏览器
+          - text: AI 生成解决方案功能，用一句话定义一款能够解决真实生活、校园场景痛点的创艺插件。
+        - heading "一句话标准格式：" [level=3] [ref=f2e35]
+        - paragraph [ref=f2e36]: 面向【目标人群】，解决【什么真实痛点】，通过【AI 能力 / 功能形式】，实现【最终价值】
+        - generic [ref=f2e37]: 作品提交要求
+        - list [ref=f2e38]:
+          - listitem [ref=f2e39]:
+            - strong [ref=f2e40]: 1. 创作工具：
+            - text: 全程使用ZERO浏览器的AI生成插件功能，完成创意构思、方案打磨、作品落地；
+          - listitem [ref=f2e41]:
+            - strong [ref=f2e42]: 2. 提交内容：
+            - text: 提交生成的插件作品，可自愿附加简短作品说明（300字以内，阐述痛点、使用场景、落地可行性、产品价值等）；
+          - listitem [ref=f2e43]:
+            - strong [ref=f2e44]: 3. 选题方向（任选）：
+            - text: 校园学习生活、大众日常上网、文旅传播、就业求职、中小企业数字化、青年普惠工具等真实场景；
+          - listitem [ref=f2e45]:
+            - strong [ref=f2e46]: 4. 原创要求：
+            - text: 创意独立原创，杜绝抄袭，聚焦真实痛点，拒绝空泛、脱离实际的概念。
+    - generic [ref=f2e47]:
+      - generic [ref=f2e48]:
+        - heading "征集周期与遴选安排" [level=2] [ref=f2e50]
+        - generic [ref=f2e51]:
+          - emphasis [ref=f2e52]: ‹
+          - text: CYCLE AND SCHEDULE
+          - emphasis [ref=f2e53]: ›
+      - generic [ref=f2e58]:
+        - generic [ref=f2e59]:
+          - heading "征集周期" [level=3] [ref=f2e60]
+          - article [ref=f2e61]:
+            - generic [ref=f2e63]:
+              - heading "作品征集期" [level=4] [ref=f2e64]
+              - paragraph [ref=f2e65]: 活动启动后持续 21 天，学生在 ZERO 浏览器专题【作品征集专区】线上提交方案
+          - article [ref=f2e66]:
+            - generic [ref=f2e68]:
+              - heading "素材初审" [level=4] [ref=f2e69]
+              - paragraph [ref=f2e70]: 征集截止后 3 个工作日，主办方筛选合规、具备实践价值的优质创意，纳入线上展示库
+          - article [ref=f2e71]:
+            - generic [ref=f2e73]:
+              - heading "专题线上展播" [level=4] [ref=f2e74]
+              - paragraph [ref=f2e75]: 入选创意在活动专题页面公开展示，面向全体参与同学开放浏览学习
+          - article [ref=f2e76]:
+            - generic [ref=f2e78]:
+              - heading "专家遴选" [level=4] [ref=f2e79]
+              - paragraph [ref=f2e80]: 线上展播结束 10 个工作日内，主办单位邀约 AI 行业、产品领域资深专家，对展出作品开展评审，遴选优质创意方案
+          - article [ref=f2e81]:
+            - generic [ref=f2e83]:
+              - heading "成果公示表彰" [level=4] [ref=f2e84]
+              - paragraph [ref=f2e85]: 公示优秀创意名单，为创作者颁发荣誉证书；优秀方案择优在中国青年网、中国文艺网新媒体平台进行宣传
+        - generic [ref=f2e86]:
+          - heading "遴选参考维度" [level=3] [ref=f2e87]
+          - generic [ref=f2e88]:
+            - article [ref=f2e89]:
+              - heading "场景真实性 40%" [level=4] [ref=f2e90]:
+                - text: 场景真实性
+                - generic [ref=f2e91]: 40%
+              - paragraph [ref=f2e92]: 是否抓住真实人群切实存在的痛点
+            - article [ref=f2e93]:
+              - heading "创意可行性 30%" [level=4] [ref=f2e94]:
+                - text: 创意可行性
+                - generic [ref=f2e95]: 30%
+              - paragraph [ref=f2e96]: 依托浏览器 AI 能力具备落地想象空间
+            - article [ref=f2e97]:
+              - heading "表达清晰度 20%" [level=4] [ref=f2e98]:
+                - text: 表达清晰度
+                - generic [ref=f2e99]: 20%
+              - paragraph [ref=f2e100]: 一句话方案表述精准、逻辑完整
+            - article [ref=f2e101]:
+              - heading "正向价值导向 10%" [level=4] [ref=f2e102]:
+                - text: 正向价值导向
+                - generic [ref=f2e103]: 10%
+              - paragraph [ref=f2e104]: 符合青年发展、数字文明、合规伦理要求
+    - generic [ref=f2e105]:
+      - generic [ref=f2e106]:
+        - heading "奖励设置" [level=2] [ref=f2e108]
+        - generic [ref=f2e109]:
+          - emphasis [ref=f2e110]: ‹
+          - text: AWARD
+          - emphasis [ref=f2e111]: ›
+      - generic [ref=f2e116]:
+        - article [ref=f2e117]:
+          - heading "金奖 若干" [level=3] [ref=f2e118]:
+            - text: 金奖
+            - generic [ref=f2e119]: 若干
+          - paragraph [ref=f2e120]: 官方荣誉证书 + 现金/实物奖励
+        - article [ref=f2e121]:
+          - heading "银奖 若干" [level=3] [ref=f2e122]:
+            - text: 银奖
+            - generic [ref=f2e123]: 若干
+          - paragraph [ref=f2e124]: 官方荣誉证书 + 现金/实物奖励
+        - article [ref=f2e125]:
+          - heading "铜奖 若干" [level=3] [ref=f2e126]:
+            - text: 铜奖
+            - generic [ref=f2e127]: 若干
+          - paragraph [ref=f2e128]: 官方荣誉证书 + 现金/实物奖励
+        - article [ref=f2e129]:
+          - heading "优秀创意奖" [level=3] [ref=f2e130]
+          - paragraph [ref=f2e131]: 电子获奖证书* 获奖名单、优秀创意方案将在中国青年网、中国文艺网官方渠道择优展示；优质创意方案有机会进行进一步落地研讨。

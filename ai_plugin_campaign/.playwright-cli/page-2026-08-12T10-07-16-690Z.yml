@@ -1,0 +1,7 @@
+- main [ref=e3]:
+  - dialog [ref=e5]:
+    - heading "检测到您当前使用的不是 ZERO 浏览器， 请先下载 ZERO 浏览器" [level=1] [ref=e10]: 检测到您当前使用的不是 ZERO 浏览器，请先下载 ZERO 浏览器
+    - paragraph [ref=e11]: 本活动的签到、AI 学习任务和工具体验均需在 ZERO 浏览器内完成。下载安装后，活动页面将自动打开，无需重新查找入口。
+    - link "立即下载 ZERO 浏览器" [ref=e12] [cursor=pointer]:
+      - /url: https://down.zbrowser.cn/ze/zero_setup___extension___setup.exe
+    - generic [ref=e16]: "*请务必点击上方按钮完成下载安装，确保学习数据准确记录"

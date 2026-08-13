@@ -1,0 +1,91 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - navigation "活动赛道" [ref=e6]:
+        - button "普惠学习体验赛道" [ref=e7] [cursor=pointer]
+        - button "AI 插件创意作品征集赛道" [ref=e8] [cursor=pointer]
+    - generic [ref=e10]:
+      - heading "智启青年・洞见 AI 未来" [level=1] [ref=e11]
+      - paragraph [ref=e12]: 把握人工智能时代机遇，直面产业变革挑战
+      - generic [ref=e13]: 普惠学习体验赛道｜AI 插件创意方案作品征集赛道
+      - button "AI 插件创意作品征集赛道" [ref=e14] [cursor=pointer]:
+        - text: AI 插件创意作品征集赛道
+        - generic [ref=e15]: →
+    - main [ref=e16]:
+      - generic [ref=e17]:
+        - generic [ref=e18]:
+          - heading "基础学习" [level=2] [ref=e19]
+          - generic [ref=e20]: 第 1 天｜基础学习启动
+          - paragraph [ref=e21]: 打开 ZERO 浏览器进入活动专题，完整学习线上主题课程，然后围绕课程知识点主动提问、交流探讨 （例如 AI 对本专业影响、就业变革、能力建设等相关问题），加深课程理解，留存互动页面截图。
+        - article [ref=e22]:
+          - heading "课程名称：《AI 浪潮下的产业变革：青年的机遇、挑战与成长路径》" [level=3] [ref=e23]
+          - heading "课程大纲：" [level=4] [ref=e24]
+          - list [ref=e25]:
+            - listitem [ref=e26]: 人工智能产业化现状，各行业智能化转型典型案例
+            - listitem [ref=e27]: AI 带来的时代机遇：创新载体、效率升级、青年就业与发展新方向
+            - listitem [ref=e28]: AI 引发的现实挑战：岗位迭代、能力竞争、AI 伦理与合规风险
+            - listitem [ref=e29]: 大学生应对策略：打造不可替代核心竞争力、科学合规使用 AI 工具
+            - listitem [ref=e30]: 青年数字素养培育指引
+          - button "去学习并互动" [ref=e32] [cursor=pointer]
+      - generic [ref=e34]:
+        - generic [ref=e35]:
+          - heading "一键转存，长期学习" [level=2] [ref=e36]
+          - paragraph [ref=e37]: 浏览器内置 100G 网盘，课件文献网课视频统一存储，多端随取
+          - button "去保存" [disabled] [ref=e38]
+        - img "ZERO 网盘课程资源转存界面" [ref=e39]
+      - generic [ref=e41]:
+        - generic [ref=e42]:
+          - heading "进阶体验" [level=2] [ref=e43]
+          - generic [ref=e44]: 第 2-7 天｜拓展内容一次性解锁
+        - generic [ref=e45]:
+          - article [ref=e46]:
+            - generic [ref=e47]:
+              - heading "AI搜索" [level=3] [ref=e48]
+              - paragraph [ref=e49]: 一个搜索框，一键切换六大搜索引擎——AI搜索、豆包AI搜索、百度、Microsoft Bing、Google。写论文用学术、查资讯用综合、要答案用AI，各取所需，省内存又高效，全程无广告。
+            - button "去搜索" [disabled] [ref=e50]
+          - article [ref=e51]:
+            - generic [ref=e52]:
+              - heading "AI换肤" [level=3] [ref=e53]
+              - paragraph [ref=e54]: 一句话生成专属浏览器主题皮肤，开启个性化美学体验。
+            - button "去换肤" [disabled] [ref=e55]
+          - article [ref=e56]:
+            - generic [ref=e57]:
+              - heading "PDF 全能工具" [level=3] [ref=e58]
+              - paragraph [ref=e59]: 免费格式转换、双语对照翻译、AI 文档总结，一键生成思维导图，PDF 常用操作一站完成。
+            - button "去体验" [disabled] [ref=e60]
+      - generic [ref=e62]:
+        - heading "学习总结" [level=2] [ref=e63]
+        - generic [ref=e64]: 倒计时：完成首次 AI 对话后开启
+        - generic [ref=e65]: 第 8 天｜深度思考 AI 主题互动
+        - paragraph [ref=e66]: 参与者登录 ZERO 浏览器活动专题，使用内置 AI 助手功能，围绕主题开展深度交流：自主提出人工智能在未来学习、校园生活、就业择业、创新创业领域能够落地的应用方向 / 场景设想，与 AI 进行对话探讨，保存完整互动截图。
+        - button "去学习并总结" [disabled] [ref=e67]
+      - generic [ref=e69]:
+        - heading "证书申领" [level=2] [ref=e70]
+        - paragraph [ref=e71]:
+          - text: 成功完成
+          - strong [ref=e72]: 【第 1 天课程学习 + 课程相关 AI 问答互动】+【第 8 天 AI 场景畅想互动】
+          - text: 两项基础任务，核验材料无误后，即可在 ZERO 浏览器活动专题页面领取官方学习证明。
+        - generic [ref=e73]: 补充说明：第 2–7 天拓展内容鼓励学习，但不作为领取证书的必备条件，兼顾学习深度与参与门槛。
+        - button "领取学习证明" [disabled] [ref=e74]
+  - form [ref=e75]:
+    - heading "活动登录" [level=2] [ref=e76]
+    - generic [ref=e77]:
+      - generic [ref=e78]:
+        - text: 学校
+        - emphasis [ref=e79]: "*"
+      - combobox "学校 *" [ref=e81] [cursor=pointer]:
+        - generic [ref=e82]: 请选择您的学校
+    - generic [ref=e85]:
+      - generic [ref=e86]:
+        - text: 姓名
+        - emphasis [ref=e87]: "*"
+      - textbox "姓名 *" [ref=e88]:
+        - /placeholder: 请输入您的姓名
+    - generic [ref=e89]:
+      - generic [ref=e90]:
+        - text: 学号
+        - emphasis [ref=e91]: "*"
+      - textbox "学号 *" [ref=e92]:
+        - /placeholder: 请输入您的学号
+    - button "确认登录" [ref=e93] [cursor=pointer]
+    - paragraph [ref=e94]: 信息仅保存在当前浏览器，用于本地演示活动流程。

@@ -1,0 +1,7 @@
+[     220ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://127.0.0.1:4177/node_modules/.vite/deps/react-dom_client.js?v=81881caa:14333
+[     237ms] [INFO] [ZERO Browser Detection] {isZeroBrowser: false, canUseNativeNavigation: false, canReadNativeIdentity: false, hasAccount360: false, browserVersion: } @ http://127.0.0.1:4177/src/services/browserEnvironment.ts:68
+[     238ms] [INFO] [ZERO Browser Detection] {isZeroBrowser: false, canUseNativeNavigation: false, canReadNativeIdentity: false, hasAccount360: false, browserVersion: } @ http://127.0.0.1:4177/src/services/browserEnvironment.ts:68
+[     337ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:4177/favicon.ico:0
+[    1415ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://127.0.0.1:4177/node_modules/.vite/deps/react-dom_client.js?v=81881caa:14333
+[    1426ms] [INFO] [ZERO Browser Detection] {isZeroBrowser: false, canUseNativeNavigation: false, canReadNativeIdentity: false, hasAccount360: false, browserVersion: } @ http://127.0.0.1:4177/src/services/browserEnvironment.ts:68
+[    1426ms] [INFO] [ZERO Browser Detection] {isZeroBrowser: false, canUseNativeNavigation: false, canReadNativeIdentity: false, hasAccount360: false, browserVersion: } @ http://127.0.0.1:4177/src/services/browserEnvironment.ts:68
