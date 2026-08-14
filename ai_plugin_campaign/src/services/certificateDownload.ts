@@ -123,7 +123,7 @@ function drawFallbackDivider(context: CanvasRenderingContext2D) {
 
 export function createCertificateFilename(studentName: string) {
   const safeName = studentName.trim().replace(/[\\/:*?"<>|]/g, '_') || '学生';
-  return `ZERO学习证明-${safeName}.png`;
+  return `「智启青年 · 洞见AI未来」学习证明-${safeName}.png`;
 }
 
 /** 按设计稿生成 1754×1243 的高清 PNG 并直接下载。 */

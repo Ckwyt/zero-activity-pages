@@ -7,8 +7,8 @@ import {
 
 describe('certificate PNG download', () => {
   it('creates a filesystem-safe student certificate filename', () => {
-    expect(createCertificateFilename(' 林/川:* ')).toBe('ZERO学习证明-林_川__.png');
-    expect(createCertificateFilename('   ')).toBe('ZERO学习证明-学生.png');
+    expect(createCertificateFilename(' 林/川:* ')).toBe('「智启青年 · 洞见AI未来」学习证明-林_川__.png');
+    expect(createCertificateFilename('   ')).toBe('「智启青年 · 洞见AI未来」学习证明-学生.png');
   });
 
   it('loads CDN certificate assets in anonymous CORS mode before assigning src', async () => {
@@ -63,10 +63,10 @@ describe('certificate PNG download', () => {
         loadImage: vi.fn(async () => ({} as CanvasImageSource)),
         saveBlob,
       },
-    )).resolves.toBe('ZERO学习证明-成宽.png');
+    )).resolves.toBe('「智启青年 · 洞见AI未来」学习证明-成宽.png');
 
     expect(canvas).toMatchObject({ width: 1754, height: 1243 });
     expect(context.fillText).toHaveBeenCalledWith('姓名：成宽', 158, 568);
-    expect(saveBlob).toHaveBeenCalledWith(expect.any(Blob), 'ZERO学习证明-成宽.png');
+    expect(saveBlob).toHaveBeenCalledWith(expect.any(Blob), '「智启青年 · 洞见AI未来」学习证明-成宽.png');
   });
 });

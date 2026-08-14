@@ -20,6 +20,7 @@ export function CertificateModal({
     try {
       await downloadCertificatePng({ studentName });
       onGenerated();
+      onClose();
     } catch (error) {
       setDownloadError(error instanceof Error ? error.message : '证书下载失败，请重试');
     } finally {
