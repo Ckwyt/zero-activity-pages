@@ -1,3 +1,5 @@
+import { externalGetMID } from '@q/browser-jssdk';
+
 interface ZeroExternalBridge {
   GetSID(hostWindow: Window): string;
   AppCmd(
@@ -73,6 +75,21 @@ export function getZeroAccountLoginStatus(
       finish('unavailable');
     }
   });
+}
+
+/**
+ * 与 newpages/src/utils/external.ts 保持一致，直接通过 browser-jssdk 同步读取 MID。
+ */
+export function getDeviceId(readMid: () => string = externalGetMID) {
+  let mid = '';
+  try {
+    mid = readMid() || '';
+  } catch {
+    mid = '';
+  }
+  const normalizedMid = typeof mid === 'string' ? mid.trim() : '';
+  console.info('[ZERO Device MID]', normalizedMid || '(empty)');
+  return normalizedMid;
 }
 
 export function openZeroUrl(url: string) {

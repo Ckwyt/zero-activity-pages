@@ -22,10 +22,10 @@ import {
 } from '../services/campaignTime';
 import {
   dispatchZeroCampaignAction,
+  getDeviceId,
   openZeroUrl,
   requestZeroAccountLogin,
 } from '../services/zeroCampaignBridge';
-import { requestDeviceInfo } from '../services/postMessageAdapter';
 import {
   getCurrentCampaignSearchValues,
   readLastValidParameter,
@@ -49,7 +49,7 @@ function readCompetitionStagePreview(
 }
 
 export function CampaignPage() {
-  const [deviceId, setDeviceId] = useState<string | null>(null);
+  const deviceId = useMemo(getDeviceId, []);
   const [session, setSession] = useState<CampaignSession>(emptyCampaignSession);
   const [storageReady, setStorageReady] = useState(false);
   const [track, setTrack] = useState<CampaignTrackId>(readTrack);
@@ -76,22 +76,9 @@ export function CampaignPage() {
   }[competitionStage] as [string, boolean, boolean];
 
   useEffect(() => {
-    let active = true;
-    void requestDeviceInfo().then(({ mid }) => {
-      if (!active) return;
-      console.info('[ZERO Device MID]', mid || '(empty)');
-      setDeviceId(mid);
-    });
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (deviceId === null) return undefined;
     if (!deviceId) {
       setStorageReady(true);
-      setNotice('未获取到设备 MID，请从 ZERO 浏览器新标签页活动入口打开。');
+      setNotice('未获取到设备 MID，请使用 ZERO 浏览器重新打开活动页面。');
       return undefined;
     }
 
@@ -161,7 +148,7 @@ export function CampaignPage() {
 
   async function updateProgress(key: keyof ActivityProgress) {
     if (!deviceId) {
-      setNotice('未获取到设备 MID，请从 ZERO 浏览器新标签页活动入口打开。');
+      setNotice('未获取到设备 MID，请使用 ZERO 浏览器重新打开活动页面。');
       return false;
     }
     try {

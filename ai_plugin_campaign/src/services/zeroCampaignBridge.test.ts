@@ -1,9 +1,29 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+const browserSdk = vi.hoisted(() => ({
+  externalGetMID: vi.fn(() => ''),
+}));
+
+vi.mock('@q/browser-jssdk', () => browserSdk);
+
 import {
+  getDeviceId,
   getZeroAccountLoginStatus,
   isZeroAccountQtLoggedIn,
   openZeroUrl,
 } from './zeroCampaignBridge';
+
+describe('ZERO device identity', () => {
+  it('reads MID with the browser-jssdk method used by newpages', () => {
+    browserSdk.externalGetMID.mockReturnValue(' 0123456789abcdef0123456789abcdef ');
+    expect(getDeviceId()).toBe('0123456789abcdef0123456789abcdef');
+    expect(browserSdk.externalGetMID).toHaveBeenCalledOnce();
+  });
+
+  it('returns an empty MID when the SDK bridge is unavailable', () => {
+    expect(getDeviceId(() => { throw new Error('bridge unavailable'); })).toBe('');
+  });
+});
 
 describe('ZERO campaign URL navigation', () => {
   beforeEach(() => {

@@ -9,6 +9,11 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // browser-jssdk 会在模块初始化阶段读取 chrome.account360。
+      // 普通浏览器没有 chrome 全局时提供空对象，保证 ZERO 下载引导仍可正常渲染。
+      globalThis.chrome ||= {};
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

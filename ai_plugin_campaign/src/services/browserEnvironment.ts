@@ -7,12 +7,6 @@ export interface BrowserEnvironmentCapabilities {
   canReadNativeIdentity: boolean;
 }
 
-export interface ParentDeviceEnvironmentInfo {
-  mid?: string;
-  mid2?: string;
-  version?: string;
-}
-
 interface BrowserEnvironmentGlobals {
   external?: unknown;
   chrome?: unknown;
@@ -88,30 +82,6 @@ export function isZeroBrowserVersionSupported(
     if (comparison !== 0) return comparison > 0;
   }
   return true;
-}
-
-/**
- * iframe 内无法直接读取 ZERO 原生桥时，用 newpages 父页面返回的设备信息补全环境判断。
- */
-export function applyParentDeviceInfo(
-  environment: BrowserEnvironmentCapabilities,
-  deviceInfo: ParentDeviceEnvironmentInfo,
-): BrowserEnvironmentCapabilities {
-  const browserVersion = deviceInfo.version?.trim() || environment.browserVersion;
-  const receivedZeroDeviceInfo = Boolean(
-    deviceInfo.mid?.trim() || deviceInfo.mid2?.trim() || browserVersion,
-  );
-  if (!receivedZeroDeviceInfo) return environment;
-
-  const isOutdatedZeroBrowser = Boolean(browserVersion)
-    && !isZeroBrowserVersionSupported(browserVersion);
-  return {
-    ...environment,
-    isZeroBrowser: true,
-    browserVersion,
-    isOutdatedZeroBrowser,
-    canUseCampaignFeatures: !isOutdatedZeroBrowser,
-  };
 }
 
 function readNativeBrowserVersion(external: Record<string, unknown> | undefined, receiver: unknown) {
