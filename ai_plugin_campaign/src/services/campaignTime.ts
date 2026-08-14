@@ -37,6 +37,10 @@ export function getLearningUnlocks(progress: ActivityProgress, now = new Date())
 export type CompetitionStage = 'before' | 'submission' | 'initial-review' | 'showcase' | 'awards';
 export type CompetitionActionState = 'upload' | 'closed' | 'showcase';
 
+export function shouldShowCompetitionAction(stage: CompetitionStage) {
+  return stage !== 'showcase' && stage !== 'awards';
+}
+
 export function getCompetitionActionState(
   now: Date,
   uploadDeadline: string,

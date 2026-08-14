@@ -163,7 +163,6 @@ export function StudentLoginModal({
         <button className="pill-button pill-button--purple login-modal__submit" type="submit" disabled={submitting}>
           {submitting ? '登录中...' : '确认登录'}
         </button>
-        <p className="login-modal__privacy">提交即表示同意将以上学生信息用于本次活动身份核验与进度记录。</p>
       </form>
     </div>
   );

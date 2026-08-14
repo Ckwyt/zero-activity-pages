@@ -57,7 +57,7 @@ function isEncryptedEnvelope(value: unknown): value is EncryptedStorageEnvelope 
 
 async function deriveStorageKey(deviceId: string) {
   if (!globalThis.crypto?.subtle) {
-    throw new CampaignStorageError('当前浏览器不支持学生信息安全存储');
+    throw new CampaignStorageError('本设备已绑定其他账号，请使用原账号登录');
   }
   const keyMaterial = new TextEncoder().encode(`${STORAGE_KEY_CONTEXT}:${deviceId}`);
   const digest = await globalThis.crypto.subtle.digest('SHA-256', keyMaterial);

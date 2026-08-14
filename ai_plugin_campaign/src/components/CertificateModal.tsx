@@ -1,42 +1,61 @@
-import { useRef } from 'react';
+import { useState } from 'react';
+import { downloadCertificatePng } from '../services/certificateDownload';
 
 export function CertificateModal({
   studentName,
-  school,
   onClose,
   onGenerated,
 }: {
   studentName: string;
-  school: string;
   onClose: () => void;
   onGenerated: () => void;
 }) {
-  const certificateRef = useRef<HTMLDivElement>(null);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState('');
 
-  function downloadCertificate() {
-    onGenerated();
-    window.print();
+  async function downloadCertificate() {
+    if (downloading) return;
+    setDownloading(true);
+    setDownloadError('');
+    try {
+      await downloadCertificatePng({ studentName });
+      onGenerated();
+    } catch (error) {
+      setDownloadError(error instanceof Error ? error.message : '证书下载失败，请重试');
+    } finally {
+      setDownloading(false);
+    }
   }
 
   return (
-    <div className="modal-layer" role="dialog" aria-modal="true" aria-labelledby="certificate-title">
+    <div className="modal-layer modal-layer--certificate" role="dialog" aria-modal="true" aria-labelledby="certificate-title">
       <div className="certificate-modal">
-        <button className="modal-close" type="button" aria-label="关闭" onClick={onClose}>×</button>
+        <button className="certificate-modal__close" type="button" aria-label="关闭" onClick={onClose}>
+          <svg aria-hidden="true" viewBox="0 0 20 20">
+            <path d="M4 4l12 12M16 4L4 16" />
+          </svg>
+        </button>
         <h2 id="certificate-title">领取学习证明</h2>
-        <div className="certificate" ref={certificateRef}>
-          <img src="/assets/figma/certificate-bg.png" alt="" />
+        <div className="certificate">
+          <img className="certificate__background" src="/assets/figma/certificate-bg.png" alt="" />
           <div className="certificate__content">
             <h3>学习证明</h3>
-            <span className="certificate__line" />
+            <img className="certificate__divider" src="/assets/figma/certificate-divider.png" alt="" />
             <p className="certificate__name">姓名：<strong>{studentName}</strong></p>
             <p className="certificate__body">
-              该同学积极参与“智启青年・洞见 AI 未来”学习体验活动，完成主题课程学习、AI 问答互动及学习总结，表现优秀，特发此证，以资鼓励！
+              恭喜您已完成「智启青年·洞见AI未来」活动的全部学习内容，并达到本项目规定的学习要求，表现符合结业标准。
             </p>
-            <p className="certificate__school">{school}<br />ZERO 浏览器活动组委会</p>
+            <p className="certificate__footer">特发此证，以资鼓励！</p>
           </div>
         </div>
-        <button className="pill-button pill-button--orange certificate-modal__action" type="button" onClick={downloadCertificate}>
-          立即领取
+        {downloadError ? <p className="certificate-modal__error" role="alert">{downloadError}</p> : null}
+        <button
+          className="pill-button pill-button--orange certificate-modal__action"
+          type="button"
+          disabled={downloading}
+          onClick={downloadCertificate}
+        >
+          {downloading ? '正在生成...' : '立即领取'}
         </button>
       </div>
     </div>

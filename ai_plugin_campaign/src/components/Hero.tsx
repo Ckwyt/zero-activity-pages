@@ -2,7 +2,7 @@ import type { CampaignTrackId } from '../types';
 
 export function Hero({
   track,
-  onSwitchCompetition,
+  onOpenPluginHub,
   competitionAction,
   competitionDisabled,
   showCompetitionIcon = false,
@@ -10,7 +10,7 @@ export function Hero({
   showCompetitionAction = true,
 }: {
   track: CampaignTrackId;
-  onSwitchCompetition: () => void;
+  onOpenPluginHub: () => void;
   competitionAction?: string;
   competitionDisabled?: boolean;
   showCompetitionIcon?: boolean;
@@ -24,7 +24,7 @@ export function Hero({
         <p>把握人工智能时代机遇，直面产业变革挑战</p>
         <small>普惠学习体验赛道｜AI 插件创意方案作品征集赛道</small>
         {track === 'learning' ? (
-          <button className="pill-button pill-button--black" type="button" onClick={onSwitchCompetition}>
+          <button className="pill-button pill-button--black" type="button" onClick={onOpenPluginHub}>
             AI 插件创意作品征集赛道
             <svg
               className="hero-route-icon"

@@ -68,7 +68,7 @@ describe('AI education student API', () => {
       apiMode: 'production',
       fetcher,
     })).rejects.toMatchObject({ code: 6, flag: 5, message: '该学生信息已被其他设备占用' });
-    expect(getAiEduErrorMessage({ code: 6, flag: 6, msg: '' })).toBe('当前设备已绑定其他学生信息');
+    expect(getAiEduErrorMessage({ code: 6, flag: 6, msg: '' })).toBe('本设备已绑定其他账号，请使用原账号登录');
     expect(getAiEduErrorMessage({ code: 3, flag: 0, msg: '参数错误' })).toBe('学生信息格式不正确，请检查后重试');
   });
 
@@ -81,5 +81,19 @@ describe('AI education student API', () => {
       flag: 0,
     });
     expect(fetcher).not.toHaveBeenCalled();
+  });
+
+  it('uses the production request path when mock mode is not explicitly enabled', async () => {
+    const fetcher = vi.fn(async () => new Response(
+      JSON.stringify({ code: 0, msg: 'ok', data: {}, flag: 0 }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } },
+    ));
+
+    await expect(addAiEduStudent(student, {
+      apiUrl: 'https://example.test/v1/ai/edu/add',
+      fetcher,
+    })).resolves.toMatchObject({ code: 0, flag: 0 });
+
+    expect(fetcher).toHaveBeenCalledOnce();
   });
 });

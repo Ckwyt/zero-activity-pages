@@ -2,13 +2,17 @@ import { describe, expect, it } from 'vitest';
 import {
   filterShowcaseWorks,
   getShowcasePageItems,
+  AWARDS_PAGE_SIZE,
   mockShowcaseWorks,
   SHOWCASE_PAGE_SIZE,
+  SHOWCASE_TOTAL_PAGES,
 } from './showcase';
 
 describe('showcase mock catalog', () => {
   it('provides twelve complete pages of deterministic mock data', () => {
-    expect(mockShowcaseWorks).toHaveLength(12 * SHOWCASE_PAGE_SIZE);
+    expect(SHOWCASE_PAGE_SIZE).toBe(20);
+    expect(AWARDS_PAGE_SIZE).toBe(16);
+    expect(mockShowcaseWorks).toHaveLength(SHOWCASE_TOTAL_PAGES * SHOWCASE_PAGE_SIZE);
     expect(new Set(mockShowcaseWorks.map((work) => work.id)).size).toBe(mockShowcaseWorks.length);
   });
 

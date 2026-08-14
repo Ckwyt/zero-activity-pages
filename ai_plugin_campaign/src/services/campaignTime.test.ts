@@ -4,6 +4,7 @@ import {
   getCompetitionActionState,
   getCompetitionStage,
   getLearningUnlocks,
+  shouldShowCompetitionAction,
 } from './campaignTime';
 
 describe('campaign natural-day unlocks', () => {
@@ -24,6 +25,14 @@ describe('campaign natural-day unlocks', () => {
     expect(getCompetitionStage(new Date('2026-09-03T12:00:00+08:00'), start, uploadDeadline, initialReviewDeadline)).toBe('initial-review');
     expect(getCompetitionStage(new Date('2026-09-08T12:00:00+08:00'), start, uploadDeadline, initialReviewDeadline)).toBe('showcase');
     expect(getCompetitionStage(new Date('2026-09-16T12:00:00+08:00'), start, uploadDeadline, initialReviewDeadline)).toBe('awards');
+  });
+
+  it('hides the hero action after the work-list stage begins', () => {
+    expect(shouldShowCompetitionAction('before')).toBe(true);
+    expect(shouldShowCompetitionAction('submission')).toBe(true);
+    expect(shouldShowCompetitionAction('initial-review')).toBe(true);
+    expect(shouldShowCompetitionAction('showcase')).toBe(false);
+    expect(shouldShowCompetitionAction('awards')).toBe(false);
   });
 
   it('keeps uploads open through the first date and switches after the second date', () => {

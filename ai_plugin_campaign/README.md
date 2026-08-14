@@ -69,7 +69,7 @@ npm run build:deploy
 - `VITE_AI_EDU_API_MODE=production|mock`；
 - `VITE_AI_EDU_ADD_URL`。
 
-V1 接口不经过 AES/Base64，也不依赖 `chrome.account360` 或 `window.external.AppCmd` 加密能力。项目通过 `.env.development` 将 `npm run dev` 固定为 `mock` 模式；如需本地联调真实接口，可将模式显式设为 `production`。学生占用和设备占用仍以正式服务端 `code/flag` 为准。
+V1 接口不经过 AES/Base64，也不依赖 `chrome.account360` 或 `window.external.AppCmd` 加密能力。项目在本地开发和正式构建中均默认使用 `production` 模式：只有接口明确返回 `code=0, flag=0` 后才写入本地存储；接口失败、业务占用或响应格式异常时都不会保存。纯 UI 联调需要跳过接口时，才可临时将 `VITE_AI_EDU_API_MODE` 显式设为 `mock`。学生占用和设备占用仍以正式服务端 `code/flag` 为准。
 
 ## ZERO 浏览器能力
 

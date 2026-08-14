@@ -3,8 +3,10 @@ import { schools } from '../data/activity';
 import {
   filterShowcaseWorks,
   getShowcasePageItems,
+  AWARDS_PAGE_SIZE,
   mockShowcaseWorks,
   SHOWCASE_PAGE_SIZE,
+  SHOWCASE_TOTAL_PAGES,
 } from '../data/showcase';
 
 export function CompetitionShowcase({
@@ -18,6 +20,7 @@ export function CompetitionShowcase({
   const [searchText, setSearchText] = useState('');
   const [keyword, setKeyword] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [voteOrder, setVoteOrder] = useState<'desc' | 'asc'>('desc');
   const [schoolListOpen, setSchoolListOpen] = useState(false);
   const [highlightedSchool, setHighlightedSchool] = useState(0);
   const sectionRef = useRef<HTMLElement>(null);
@@ -27,14 +30,22 @@ export function CompetitionShowcase({
     [],
   );
 
-  const filteredWorks = useMemo(
-    () => filterShowcaseWorks(mockShowcaseWorks, school, keyword),
-    [keyword, school],
+  const pageSize = awards ? AWARDS_PAGE_SIZE : SHOWCASE_PAGE_SIZE;
+  const stageWorks = useMemo(
+    () => mockShowcaseWorks.slice(0, pageSize * SHOWCASE_TOTAL_PAGES),
+    [pageSize],
   );
-  const totalPages = Math.ceil(filteredWorks.length / SHOWCASE_PAGE_SIZE);
+  const filteredWorks = useMemo(() => {
+    const works = filterShowcaseWorks(stageWorks, school, keyword);
+    return works.sort((left, right) => {
+      const difference = Number(left.badge) - Number(right.badge);
+      return voteOrder === 'asc' ? difference : -difference;
+    });
+  }, [keyword, school, stageWorks, voteOrder]);
+  const totalPages = Math.ceil(filteredWorks.length / pageSize);
   const currentWorks = filteredWorks.slice(
-    (currentPage - 1) * SHOWCASE_PAGE_SIZE,
-    currentPage * SHOWCASE_PAGE_SIZE,
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize,
   );
   const pageItems = getShowcasePageItems(currentPage, totalPages);
 
@@ -111,7 +122,11 @@ export function CompetitionShowcase({
   }
 
   return (
-    <main id="showcase" className="competition-showcase" ref={sectionRef}>
+    <main
+      id="showcase"
+      className={`competition-showcase ${awards ? 'competition-showcase--awards' : 'competition-showcase--review'}`}
+      ref={sectionRef}
+    >
       <a
         className="rules-dock competition-showcase__rules"
         href="?stage=submission"
@@ -120,7 +135,24 @@ export function CompetitionShowcase({
         <span>活动<br />规则</span>
       </a>
       <div className="competition-showcase__shell">
-        <h2>{awards ? '获奖作品公示' : '作品展示'}</h2>
+        <div className="competition-showcase__heading">
+          <h2>作品展示</h2>
+          <button
+            className="showcase-vote-sort"
+            type="button"
+            aria-label={`票数排序，当前为${voteOrder === 'desc' ? '从高到低' : '从低到高'}`}
+            onClick={() => {
+              setVoteOrder((current) => current === 'desc' ? 'asc' : 'desc');
+              setCurrentPage(1);
+            }}
+          >
+            <span>票数排序</span>
+            <span className="showcase-vote-sort__arrows" aria-hidden="true">
+              <i className={voteOrder === 'asc' ? 'is-active' : undefined} />
+              <i className={voteOrder === 'desc' ? 'is-active' : undefined} />
+            </span>
+          </button>
+        </div>
 
         <form className="showcase-filters" onSubmit={submitSearch}>
           <div className="showcase-school-select" ref={schoolSelectRef}>
@@ -183,30 +215,23 @@ export function CompetitionShowcase({
         {currentWorks.length ? (
           <div className="showcase-grid">
             {currentWorks.map((work) => (
-              <article className="showcase-card" key={work.id}>
+              <article className={`showcase-card ${awards ? 'showcase-card--awards' : 'showcase-card--review'}`} key={work.id}>
                 <div className="showcase-card__cover">
                   <img src={work.image} alt="" />
-                  <span>{work.badge}</span>
                 </div>
                 <div className="showcase-card__copy">
                   <h3>{work.title}</h3>
                   <p>{work.description}</p>
                 </div>
-                <footer className={awards ? 'showcase-card__footer--awards' : undefined}>
-                  <div className="showcase-card__publisher">
-                    <img src="/assets/figma/showcase/zero-logo.png" alt="" />
-                    <span>{work.author}</span>
-                  </div>
-                  {awards ? (
-                    <button
-                      className="showcase-install-button"
-                      type="button"
-                      onClick={() => onInstall?.(work.id)}
-                    >
-                      安装到ZERO
-                    </button>
-                  ) : null}
-                </footer>
+                {awards ? (
+                  <button
+                    className="showcase-install-button"
+                    type="button"
+                    onClick={() => onInstall?.(work.id)}
+                  >
+                    安装到ZERO
+                  </button>
+                ) : null}
               </article>
             ))}
           </div>

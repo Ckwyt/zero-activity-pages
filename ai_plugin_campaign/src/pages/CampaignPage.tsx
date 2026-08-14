@@ -9,15 +9,15 @@ import { RulesModal } from '../components/RulesModal';
 import { StudentLoginModal } from '../components/StudentLoginModal';
 import { SubmissionEndedModal } from '../components/SubmissionEndedModal';
 import { activityLinks, competitionConfig } from '../data/activity';
-import { addAiEduStudent } from '../services/aiEduApi';
 import {
   markProgress,
   readCampaignSession,
-  saveStudent,
 } from '../services/campaignStorage';
+import { submitStudentLogin } from '../services/studentLogin';
 import {
   getCompetitionStage,
   getLearningUnlocks,
+  shouldShowCompetitionAction,
   type CompetitionStage,
 } from '../services/campaignTime';
 import {
@@ -135,8 +135,7 @@ export function CampaignPage() {
   async function login(payload: StudentLoginPayload) {
     let next;
     try {
-      await addAiEduStudent(payload);
-      next = await saveStudent(payload, { allowExisting: true });
+      next = await submitStudentLogin(payload);
     } catch (error) {
       return error instanceof Error ? error.message : '登录失败，请重试。';
     }
@@ -191,10 +190,19 @@ export function CampaignPage() {
     }
   }
 
+  async function openPluginHub() {
+    dispatchZeroCampaignAction('plugin-hub-opened');
+    try {
+      await openZeroUrl(activityLinks.pluginGenerator);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : '打开 AI 插件页面失败，请稍后重试');
+    }
+  }
+
   async function competitionAction() {
     if (competitionStage === 'submission') {
       dispatchZeroCampaignAction('plugin-submission-opened');
-      await openZeroUrl(activityLinks.pluginGenerator);
+      await openPluginHub();
       return;
     }
     if (competitionStage === 'initial-review') {
@@ -222,12 +230,12 @@ export function CampaignPage() {
         <CampaignHeader activeTrack={track} onChange={setTrack} />
         <Hero
           track={track}
-          onSwitchCompetition={() => setTrack('competition')}
+          onOpenPluginHub={openPluginHub}
           competitionAction={stageButton[0]}
           competitionDisabled={stageButton[1]}
           showCompetitionIcon={stageButton[2]}
           onCompetitionAction={competitionAction}
-          showCompetitionAction
+          showCompetitionAction={shouldShowCompetitionAction(competitionStage)}
         />
         {track === 'learning' ? (
           <LearningTrack
@@ -264,7 +272,6 @@ export function CampaignPage() {
       {showCertificate && session.profile ? (
         <CertificateModal
           studentName={session.profile.name}
-          school={session.profile.school}
           onClose={() => setShowCertificate(false)}
           onGenerated={generateCertificate}
         />

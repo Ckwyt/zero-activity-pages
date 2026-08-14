@@ -12,7 +12,9 @@ export interface ShowcaseWork {
 
 export type ShowcasePageItem = number | 'ellipsis-start' | 'ellipsis-end';
 
-export const SHOWCASE_PAGE_SIZE = 12;
+export const SHOWCASE_PAGE_SIZE = 20;
+export const AWARDS_PAGE_SIZE = 16;
+export const SHOWCASE_TOTAL_PAGES = 12;
 
 const schoolProfiles = [
   { school: '北京大学', colleges: ['信息科学技术学院', '建筑与景观设计学院', '新闻与传播学院'] },
@@ -52,8 +54,8 @@ const showcaseImages = [
 const surnames = ['张', '王', '李', '赵', '陈', '刘', '杨', '黄', '周', '吴', '徐', '孙'];
 const givenNames = ['雨桐', '子涵', '思远', '嘉怡', '宇轩', '若溪', '明哲', '一诺', '知夏', '景行', '诗涵', '浩然'];
 
-// 144 条固定模拟记录，对应设计稿中的 12 页，每页 12 条。
-export const mockShowcaseWorks: ShowcaseWork[] = Array.from({ length: 144 }, (_, index) => {
+// 初审稿为 12 页、每页 20 条；最终页从同一目录中取前 192 条，每页 16 条。
+export const mockShowcaseWorks: ShowcaseWork[] = Array.from({ length: SHOWCASE_TOTAL_PAGES * SHOWCASE_PAGE_SIZE }, (_, index) => {
   const profile = schoolProfiles[index % schoolProfiles.length];
   const [title, description] = workTemplates[(index * 5 + Math.floor(index / 10)) % workTemplates.length];
   return {

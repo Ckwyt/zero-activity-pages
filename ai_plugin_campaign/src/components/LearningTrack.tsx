@@ -7,13 +7,11 @@ const LEARNING_BUTTON_GATES_ENABLED = false;
 function GradientButton({
   children,
   disabled,
-  completed,
   onClick,
   title,
 }: {
   children: string;
   disabled?: boolean;
-  completed?: boolean;
   onClick: () => void;
   title?: string;
 }) {
@@ -25,7 +23,7 @@ function GradientButton({
       title={title}
       onClick={onClick}
     >
-      {completed ? '已完成' : children}
+      {children}
     </button>
   );
 }
@@ -75,7 +73,7 @@ export function LearningTrack({
             <li>青年数字素养培育指引</li>
           </ol>
           <div className="course-card__actions">
-            <GradientButton completed={Boolean(progress.courseOpenedAt)} onClick={onLearn}>去学习并互动</GradientButton>
+            <GradientButton onClick={onLearn}>去学习并互动</GradientButton>
             {import.meta.env.DEV && progress.courseOpenedAt && !progress.firstAiInteractionAt ? (
               <button className="dev-complete" type="button" onClick={onMockAiInteraction}>开发预览：模拟首次 AI 对话</button>
             ) : null}
@@ -91,7 +89,6 @@ export function LearningTrack({
             <p>浏览器内置 100G 网盘，课件文献网课视频统一存储，多端随取</p>
             <GradientButton
               disabled={LEARNING_BUTTON_GATES_ENABLED && !dayTwoUnlocked}
-              completed={Boolean(progress.driveCompletedAt)}
               title={LEARNING_BUTTON_GATES_ENABLED && !dayTwoUnlocked ? waitingText : undefined}
               onClick={() => onAction('drive')}
             >去保存</GradientButton>
@@ -138,7 +135,6 @@ export function LearningTrack({
               description="一个搜索框，一键切换六大搜索引擎——AI搜索、豆包AI搜索、百度、Microsoft Bing、Google。写论文用学术、查资讯用综合、要答案用AI，各取所需，省内存又高效，全程无广告。"
               button="去搜索"
               disabled={LEARNING_BUTTON_GATES_ENABLED && !dayTwoUnlocked}
-              completed={Boolean(progress.searchCompletedAt)}
               onClick={() => onAction('search')}
             />
             <ExperienceItem
@@ -146,7 +142,6 @@ export function LearningTrack({
               description="一句话生成专属浏览器主题皮肤，开启个性化美学体验。"
               button="去换肤"
               disabled={LEARNING_BUTTON_GATES_ENABLED && !dayTwoUnlocked}
-              completed={Boolean(progress.skinCompletedAt)}
               onClick={() => onAction('skin')}
             />
             <ExperienceItem
@@ -154,7 +149,6 @@ export function LearningTrack({
               description="免费格式转换、双语对照翻译、AI 文档总结，一键生成思维导图，PDF 常用操作一站完成。"
               button="去体验"
               disabled={LEARNING_BUTTON_GATES_ENABLED && !dayTwoUnlocked}
-              completed={Boolean(progress.pdfCompletedAt)}
               onClick={() => onAction('pdf')}
             />
           </div>
@@ -172,7 +166,6 @@ export function LearningTrack({
           <p>参与者登录 ZERO 浏览器活动专题，使用内置 AI 助手功能，围绕主题开展深度交流：自主提出人工智能在未来学习、校园生活、就业择业、创新创业领域能够落地的应用方向 / 场景设想，与 AI 进行对话探讨，保存完整互动截图。</p>
           <GradientButton
             disabled={LEARNING_BUTTON_GATES_ENABLED && !dayEightUnlocked}
-            completed={Boolean(progress.summaryCompletedAt)}
             title={LEARNING_BUTTON_GATES_ENABLED && !dayEightUnlocked ? '完成首次 AI 对话后的第 8 天解锁' : undefined}
             onClick={() => onAction('summary')}
           >去学习并总结</GradientButton>
@@ -251,14 +244,12 @@ function ExperienceItem({
   description,
   button,
   disabled,
-  completed,
   onClick,
 }: {
   title: string;
   description: string;
   button: string;
   disabled: boolean;
-  completed: boolean;
   onClick: () => void;
 }) {
   return (
@@ -267,7 +258,7 @@ function ExperienceItem({
         <h3>{title}</h3>
         <p>{description}</p>
       </div>
-      <GradientButton disabled={disabled} completed={completed} onClick={onClick}>{button}</GradientButton>
+      <GradientButton disabled={disabled} onClick={onClick}>{button}</GradientButton>
     </article>
   );
 }

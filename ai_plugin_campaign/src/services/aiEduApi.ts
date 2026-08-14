@@ -69,7 +69,7 @@ export function getAiEduErrorMessage(response: Pick<AiEduAddResponse, 'code' | '
   const knownMessages: Record<string, string> = {
     '3:0': '学生信息格式不正确，请检查后重试',
     '6:5': '该学生信息已被其他设备占用',
-    '6:6': '当前设备已绑定其他学生信息',
+    '6:6': '本设备已绑定其他账号，请使用原账号登录',
     '9:10': '登录请求已过期，请重新提交',
     '9:3': '学生信息状态已变化，请重新提交',
     '13:8': '学生信息查询失败，请稍后重试',
@@ -92,10 +92,11 @@ function isAiEduResponse(value: unknown): value is AiEduAddResponse {
 
 export async function addAiEduStudent(payload: StudentLoginPayload, options: AiEduApiOptions = {}) {
   const plain = normalizeAiEduPayload(payload, options.now);
-  // 本地开发默认使用 mock；V1 正式接口直接接收明文 JSON 字符串，无需客户端加密。
+  // 默认始终调用真实接口；只有显式配置 mock 时才跳过网络请求。
+  // V1 正式接口直接接收明文 JSON 字符串，无需客户端加密。
   const mode = options.apiMode
     ?? import.meta.env.VITE_AI_EDU_API_MODE
-    ?? (import.meta.env.DEV ? 'mock' : 'production');
+    ?? 'production';
   if (mode === 'mock') return { code: 0, msg: 'ok', data: {}, flag: 0 } satisfies AiEduAddResponse;
 
   const requestBody = new URLSearchParams({ jb: JSON.stringify(plain) });
