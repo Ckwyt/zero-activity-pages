@@ -35,3 +35,10 @@ export function getCurrentCampaignSearchValues() {
   if (typeof window === 'undefined') return [];
   return [window.location.search, window.location.hash];
 }
+
+const learningPreviewSettings = ['all'] as const;
+
+/** `learningPreview=all` 只用于页面联调，不改变真实学习进度。 */
+export function readLearningPreviewSetting(...searchValues: Array<string | undefined>) {
+  return readLastValidParameter('learningPreview', learningPreviewSettings, ...searchValues);
+}

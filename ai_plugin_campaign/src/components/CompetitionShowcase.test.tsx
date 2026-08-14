@@ -27,8 +27,8 @@ describe('CompetitionShowcase award actions', () => {
     expect(awards).toContain('<h2>作品展示</h2>');
     expect(awards).not.toContain('获奖作品公示');
     expect(awards).toContain('showcase-card--awards');
-    expect(showcase).toContain('票数排序');
-    expect(awards).toContain('票数排序');
+    expect(showcase).not.toContain('票数排序');
+    expect(awards).not.toContain('票数排序');
   });
 
   it('links the rules dock to the submission-stage page in both showcase variants', () => {

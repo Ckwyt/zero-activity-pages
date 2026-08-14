@@ -29,6 +29,7 @@ import {
 import {
   getCurrentCampaignSearchValues,
   readLastValidParameter,
+  readLearningPreviewSetting,
 } from '../services/urlParameters';
 import type { ActivityProgress, CampaignSession, CampaignTrackId, StudentLoginPayload } from '../types';
 
@@ -59,6 +60,10 @@ export function CampaignPage() {
   const [showCertificate, setShowCertificate] = useState(false);
   const [showSubmissionEnded, setShowSubmissionEnded] = useState(false);
   const [notice, setNotice] = useState('');
+  const forceAllLearningTasksUnlocked = useMemo(
+    () => readLearningPreviewSetting(...getCurrentCampaignSearchValues()) === 'all',
+    [],
+  );
   const previewCompetitionStage = useMemo(readCompetitionStagePreview, []);
   const competitionStage = previewCompetitionStage ?? getCompetitionStage(
     new Date(),
@@ -280,6 +285,7 @@ export function CampaignPage() {
             progress={session.progress}
             t1={aiEduBinding.t1}
             t6={aiEduBinding.t6}
+            forceAllUnlocked={forceAllLearningTasksUnlocked}
             onLearn={learn}
             onMockAiInteraction={mockAiInteraction}
             onAction={performAction}

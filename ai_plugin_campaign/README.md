@@ -56,6 +56,8 @@ npm run build:deploy
 
 指定 `stage` 后会自动切换至作品赛道；`showcase` 和 `awards` 在学生登录后会自动定位到作品列表。移除 `stage` 参数即可恢复按真实赛事日期判断。
 
+学习赛道联调时，可使用 `/?learningPreview=all` 临时解锁“去保存”、三个进阶体验、“去学习并总结”和“领取学习证明”按钮。该参数只覆盖当前页面的按钮展示，不会修改本地进度，也不会伪造或上报服务端 `t1/t6`；移除参数后立即恢复真实接口状态。
+
 点击“确认登录”后，页面通过 V1 明文免登录协议调用
 `POST https://user.zbrowser.cn/v1/ai/edu/add`，将学生信息 JSON 字符串写入表单字段 `jb`。只有接口返回 `code=0, flag=0` 后，才会保存学生资料并触发 ZERO 账号登录。学生资料及任务进度保存在以下 `localStorage` 键：
 
@@ -84,7 +86,7 @@ V1 接口不经过 AES/Base64，也不依赖 `chrome.account360` 或 `window.ext
 
 最低支持版本为 `2.0.1322.0`。`ZeroBrowserGate` 默认开启：普通浏览器会展示 ZERO 下载弹窗，低版本 ZERO 会展示更新提示。URL 参数优先于环境变量：开发地址使用 `/?zeroGate=off` 临时关闭、`/?zeroGate=on` 开启；正式 Hash 路由地址使用 `#/?zeroGate=off` 或 `#/?zeroGate=on`。删除参数后恢复 `VITE_ZERO_BROWSER_GATE` 配置及默认行为。
 
-多个 URL 参数使用 `&` 连接，例如 `/?stage=initial-review&zeroGate=off`。页面兼容误写的多个 `?`；同名参数重复时使用最后一个有效值，但建议每个参数只保留一次，避免阶段含义冲突。
+多个 URL 参数使用 `&` 连接，例如 `/?zeroGate=off&learningPreview=all` 或 `/?stage=initial-review&zeroGate=off`。页面兼容误写的多个 `?`；同名参数重复时使用最后一个有效值，但建议每个参数只保留一次，避免阶段含义冲突。
 
 ZERO 原生业务动作集中在 `src/services/zeroCampaignBridge.ts`。页面会派发以下集成事件，浏览器侧可按正式协议接入：
 

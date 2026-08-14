@@ -20,7 +20,6 @@ export function CompetitionShowcase({
   const [searchText, setSearchText] = useState('');
   const [keyword, setKeyword] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [voteOrder, setVoteOrder] = useState<'desc' | 'asc'>('desc');
   const [schoolListOpen, setSchoolListOpen] = useState(false);
   const [highlightedSchool, setHighlightedSchool] = useState(0);
   const sectionRef = useRef<HTMLElement>(null);
@@ -35,13 +34,10 @@ export function CompetitionShowcase({
     () => mockShowcaseWorks.slice(0, pageSize * SHOWCASE_TOTAL_PAGES),
     [pageSize],
   );
-  const filteredWorks = useMemo(() => {
-    const works = filterShowcaseWorks(stageWorks, school, keyword);
-    return works.sort((left, right) => {
-      const difference = Number(left.badge) - Number(right.badge);
-      return voteOrder === 'asc' ? difference : -difference;
-    });
-  }, [keyword, school, stageWorks, voteOrder]);
+  const filteredWorks = useMemo(
+    () => filterShowcaseWorks(stageWorks, school, keyword),
+    [keyword, school, stageWorks],
+  );
   const totalPages = Math.ceil(filteredWorks.length / pageSize);
   const currentWorks = filteredWorks.slice(
     (currentPage - 1) * pageSize,
@@ -135,24 +131,7 @@ export function CompetitionShowcase({
         <span>活动<br />规则</span>
       </a>
       <div className="competition-showcase__shell">
-        <div className="competition-showcase__heading">
-          <h2>作品展示</h2>
-          <button
-            className="showcase-vote-sort"
-            type="button"
-            aria-label={`票数排序，当前为${voteOrder === 'desc' ? '从高到低' : '从低到高'}`}
-            onClick={() => {
-              setVoteOrder((current) => current === 'desc' ? 'asc' : 'desc');
-              setCurrentPage(1);
-            }}
-          >
-            <span>票数排序</span>
-            <span className="showcase-vote-sort__arrows" aria-hidden="true">
-              <i className={voteOrder === 'asc' ? 'is-active' : undefined} />
-              <i className={voteOrder === 'desc' ? 'is-active' : undefined} />
-            </span>
-          </button>
-        </div>
+        <h2>作品展示</h2>
 
         <form className="showcase-filters" onSubmit={submitSearch}>
           <div className="showcase-school-select" ref={schoolSelectRef}>

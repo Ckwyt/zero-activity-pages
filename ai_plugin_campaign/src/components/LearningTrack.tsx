@@ -30,6 +30,7 @@ export function LearningTrack({
   progress,
   t1,
   t6,
+  forceAllUnlocked = false,
   onLearn,
   onMockAiInteraction,
   onAction,
@@ -38,6 +39,7 @@ export function LearningTrack({
   progress: ActivityProgress;
   t1: number;
   t6: number;
+  forceAllUnlocked?: boolean;
   onLearn: () => void;
   onMockAiInteraction: () => void;
   onAction: (action: 'drive' | 'search' | 'skin' | 'pdf' | 'summary') => void;
@@ -45,7 +47,10 @@ export function LearningTrack({
 }) {
   const [now, setNow] = useState(() => Date.now());
   const unlocks = getLearningUnlocks({ t1, t6 }, new Date(now));
-  const { dayTwo: dayTwoUnlocked, dayEight: dayEightUnlocked, certificate: certificateUnlocked, elapsedDays } = unlocks;
+  const dayTwoUnlocked = forceAllUnlocked || unlocks.dayTwo;
+  const dayEightUnlocked = forceAllUnlocked || unlocks.dayEight;
+  const certificateUnlocked = forceAllUnlocked || unlocks.certificate;
+  const { elapsedDays } = unlocks;
   const hasCompletedFirstCourse = t1 > 0;
   const waitingText = '完成首次 AI 对话后的次日 00:00 解锁';
 
