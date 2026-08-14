@@ -13,9 +13,14 @@ interface CertificateDownloadDependencies {
   saveBlob?: (blob: Blob, filename: string) => void;
 }
 
-function loadImage(source: string): Promise<HTMLImageElement> {
+export function loadImageForCanvas(
+  source: string,
+  createImage: () => HTMLImageElement = () => new Image(),
+): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
-    const image = new Image();
+    const image = createImage();
+    // CDN 图片必须以 CORS 模式加载，否则 drawImage 后 Canvas 会被污染，无法导出 PNG。
+    image.crossOrigin = 'anonymous';
     image.decoding = 'async';
     image.onload = () => resolve(image);
     image.onerror = () => reject(new Error(`证书资源加载失败：${source}`));
@@ -29,10 +34,14 @@ function createCanvas() {
 
 function canvasToBlob(canvas: HTMLCanvasElement) {
   return new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob((blob) => {
-      if (blob) resolve(blob);
-      else reject(new Error('证书图片生成失败'));
-    }, 'image/png');
+    try {
+      canvas.toBlob((blob) => {
+        if (blob) resolve(blob);
+        else reject(new Error('证书图片生成失败'));
+      }, 'image/png');
+    } catch (error) {
+      reject(new Error('证书图片导出失败，请刷新页面后重试', { cause: error }));
+    }
   });
 }
 
@@ -71,6 +80,47 @@ function drawWrappedText(
   if (line) context.fillText(line, x, currentY);
 }
 
+function drawFallbackBackground(context: CanvasRenderingContext2D) {
+  context.save();
+  context.fillStyle = '#5d83bd';
+  context.fillRect(0, 0, CERTIFICATE_WIDTH, CERTIFICATE_HEIGHT);
+  context.fillStyle = '#fff';
+  context.fillRect(34, 34, CERTIFICATE_WIDTH - 68, CERTIFICATE_HEIGHT - 68);
+
+  context.save();
+  context.beginPath();
+  context.rect(58, 58, CERTIFICATE_WIDTH - 116, CERTIFICATE_HEIGHT - 116);
+  context.clip();
+  context.globalAlpha = 0.42;
+  context.strokeStyle = '#e7ebf2';
+  context.lineWidth = 2;
+  for (let offset = -CERTIFICATE_HEIGHT; offset < CERTIFICATE_WIDTH; offset += 72) {
+    context.beginPath();
+    context.moveTo(offset, 58);
+    context.lineTo(offset + CERTIFICATE_HEIGHT, CERTIFICATE_HEIGHT - 58);
+    context.stroke();
+    context.beginPath();
+    context.moveTo(offset + CERTIFICATE_HEIGHT, 58);
+    context.lineTo(offset, CERTIFICATE_HEIGHT - 58);
+    context.stroke();
+  }
+  context.restore();
+
+  context.strokeStyle = '#547db8';
+  context.lineWidth = 5;
+  context.strokeRect(60, 60, CERTIFICATE_WIDTH - 120, CERTIFICATE_HEIGHT - 120);
+  context.restore();
+}
+
+function drawFallbackDivider(context: CanvasRenderingContext2D) {
+  const dividerGradient = context.createLinearGradient(648, 0, 1106, 0);
+  dividerGradient.addColorStop(0, 'rgba(198,144,50,0)');
+  dividerGradient.addColorStop(0.5, '#d9ae5f');
+  dividerGradient.addColorStop(1, 'rgba(198,144,50,0)');
+  context.fillStyle = dividerGradient;
+  context.fillRect(648, 340, 458, 10);
+}
+
 export function createCertificateFilename(studentName: string) {
   const safeName = studentName.trim().replace(/[\\/:*?"<>|]/g, '_') || '学生';
   return `ZERO学习证明-${safeName}.png`;
@@ -87,13 +137,18 @@ export async function downloadCertificatePng(
   const context = canvas.getContext('2d');
   if (!context) throw new Error('当前浏览器无法生成证书图片');
 
-  const imageLoader = dependencies.loadImage ?? loadImage;
-  const [background, divider] = await Promise.all([
+  const imageLoader = dependencies.loadImage ?? loadImageForCanvas;
+  const [background, divider] = await Promise.allSettled([
     imageLoader(CERTIFICATE_BACKGROUND),
     imageLoader(CERTIFICATE_DIVIDER),
   ]);
 
-  context.drawImage(background, 0, 0, CERTIFICATE_WIDTH, CERTIFICATE_HEIGHT);
+  if (background.status === 'fulfilled') {
+    context.drawImage(background.value, 0, 0, CERTIFICATE_WIDTH, CERTIFICATE_HEIGHT);
+  } else {
+    console.warn('[Certificate] 背景图加载失败，已使用本地绘制的安全底图。', background.reason);
+    drawFallbackBackground(context);
+  }
 
   context.textAlign = 'center';
   context.textBaseline = 'alphabetic';
@@ -104,7 +159,12 @@ export async function downloadCertificatePng(
   titleGradient.addColorStop(1, '#c69032');
   context.fillStyle = titleGradient;
   context.fillText('学习证明', CERTIFICATE_WIDTH / 2, 304);
-  context.drawImage(divider, 648, 340, 458, 10);
+  if (divider.status === 'fulfilled') {
+    context.drawImage(divider.value, 648, 340, 458, 10);
+  } else {
+    console.warn('[Certificate] 分隔线加载失败，已使用本地绘制的安全样式。', divider.reason);
+    drawFallbackDivider(context);
+  }
 
   context.textAlign = 'left';
   context.fillStyle = '#121b29';

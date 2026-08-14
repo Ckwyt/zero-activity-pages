@@ -1,10 +1,40 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createCertificateFilename, downloadCertificatePng } from './certificateDownload';
+import {
+  createCertificateFilename,
+  downloadCertificatePng,
+  loadImageForCanvas,
+} from './certificateDownload';
 
 describe('certificate PNG download', () => {
   it('creates a filesystem-safe student certificate filename', () => {
     expect(createCertificateFilename(' 林/川:* ')).toBe('ZERO学习证明-林_川__.png');
     expect(createCertificateFilename('   ')).toBe('ZERO学习证明-学生.png');
+  });
+
+  it('loads CDN certificate assets in anonymous CORS mode before assigning src', async () => {
+    const assignments: string[] = [];
+    let assignedCrossOrigin = '';
+    const image = {
+      get crossOrigin() {
+        return assignedCrossOrigin;
+      },
+      set crossOrigin(value: string) {
+        assignedCrossOrigin = value;
+      },
+      decoding: 'auto',
+      onload: null,
+      onerror: null,
+      set src(value: string) {
+        assignments.push(`${assignedCrossOrigin}:${value}`);
+      },
+    } as unknown as HTMLImageElement;
+
+    const loading = loadImageForCanvas('https://cdn.example.test/certificate.png', () => image);
+    image.onload?.(new Event('load'));
+
+    await expect(loading).resolves.toBe(image);
+    expect(image.crossOrigin).toBe('anonymous');
+    expect(assignments).toEqual(['anonymous:https://cdn.example.test/certificate.png']);
   });
 
   it('renders a high-resolution certificate and saves it directly', async () => {
