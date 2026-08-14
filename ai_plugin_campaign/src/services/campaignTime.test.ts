@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   elapsedChinaCalendarDays,
+  getDayEightUnlockTime,
   getCompetitionActionState,
   getCompetitionStage,
   getLearningUnlocks,
@@ -10,10 +11,24 @@ import {
 describe('campaign natural-day unlocks', () => {
   it('unlocks at Beijing midnight instead of after 24 hours', () => {
     expect(elapsedChinaCalendarDays('2026-08-12T23:59:00+08:00', new Date('2026-08-13T00:01:00+08:00'))).toBe(1);
+    const t1 = Date.parse('2026-08-12T23:59:00+08:00') / 1000;
     expect(getLearningUnlocks(
-      { firstAiInteractionAt: '2026-08-12T23:59:00+08:00' },
+      { t1, t6: 0 },
       new Date('2026-08-19T00:01:00+08:00'),
     ).dayEight).toBe(true);
+    expect(getDayEightUnlockTime(t1)).toBe(Date.parse('2026-08-19T00:00:00+08:00'));
+  });
+
+  it('uses server t1 and t6 timestamps as the only learning unlock source', () => {
+    const t1 = Date.parse('2026-08-12T10:00:00+08:00') / 1000;
+    expect(getLearningUnlocks({ t1: 0, t6: 0 }, new Date('2026-08-20T00:00:00+08:00')))
+      .toMatchObject({ dayTwo: false, dayEight: false, certificate: false });
+    expect(getLearningUnlocks({ t1, t6: 0 }, new Date('2026-08-13T00:00:00+08:00')))
+      .toMatchObject({ dayTwo: true, dayEight: false, certificate: false });
+    expect(getLearningUnlocks({ t1, t6: 0 }, new Date('2026-08-19T00:00:00+08:00')))
+      .toMatchObject({ dayTwo: true, dayEight: true, certificate: false });
+    expect(getLearningUnlocks({ t1, t6: 1_797_600_000 }, new Date('2026-08-19T00:00:00+08:00')))
+      .toMatchObject({ certificate: true });
   });
 
   it('derives all competition stages from configured dates', () => {

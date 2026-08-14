@@ -9,6 +9,7 @@ import { RulesModal } from '../components/RulesModal';
 import { StudentLoginModal } from '../components/StudentLoginModal';
 import { SubmissionEndedModal } from '../components/SubmissionEndedModal';
 import { activityLinks, competitionConfig } from '../data/activity';
+import { getAiEduBinding, type AiEduBindingData } from '../services/aiEduBindingApi';
 import {
   markProgress,
   readCampaignSession,
@@ -16,7 +17,6 @@ import {
 import { submitStudentLogin } from '../services/studentLogin';
 import {
   getCompetitionStage,
-  getLearningUnlocks,
   shouldShowCompetitionAction,
   type CompetitionStage,
 } from '../services/campaignTime';
@@ -33,6 +33,7 @@ import {
 import type { ActivityProgress, CampaignSession, CampaignTrackId, StudentLoginPayload } from '../types';
 
 const emptyCampaignSession: CampaignSession = { profile: null, progress: {} };
+const emptyAiEduBinding: AiEduBindingData = { hasBind: false, t1: 0, t6: 0 };
 const competitionStages = ['before', 'submission', 'initial-review', 'showcase', 'awards'] as const;
 
 function readTrack(): CampaignTrackId {
@@ -51,13 +52,13 @@ function readCompetitionStagePreview(
 export function CampaignPage() {
   const deviceId = useMemo(getDeviceId, []);
   const [session, setSession] = useState<CampaignSession>(emptyCampaignSession);
+  const [aiEduBinding, setAiEduBinding] = useState<AiEduBindingData>(emptyAiEduBinding);
   const [storageReady, setStorageReady] = useState(false);
   const [track, setTrack] = useState<CampaignTrackId>(readTrack);
   const [showRules, setShowRules] = useState(false);
   const [showCertificate, setShowCertificate] = useState(false);
   const [showSubmissionEnded, setShowSubmissionEnded] = useState(false);
   const [notice, setNotice] = useState('');
-  const unlocks = getLearningUnlocks(session.progress);
   const previewCompetitionStage = useMemo(readCompetitionStagePreview, []);
   const competitionStage = previewCompetitionStage ?? getCompetitionStage(
     new Date(),
@@ -98,6 +99,43 @@ export function CampaignPage() {
       active = false;
     };
   }, [deviceId]);
+
+  useEffect(() => {
+    const storedStudentDeviceId = session.profile?.deviceId;
+    if (!storageReady || !deviceId || !storedStudentDeviceId) {
+      setAiEduBinding(emptyAiEduBinding);
+      return undefined;
+    }
+
+    let active = true;
+    let requesting = false;
+    async function refreshBinding() {
+      if (requesting) return;
+      requesting = true;
+      try {
+        const result = await getAiEduBinding(deviceId);
+        if (active) setAiEduBinding(result);
+      } catch (error) {
+        console.error('[AI EDU Binding] 查询设备学习进度失败：', error);
+        if (active) setNotice(error instanceof Error ? error.message : '学习进度查询失败，请稍后重试');
+      } finally {
+        requesting = false;
+      }
+    }
+
+    function refreshWhenVisible() {
+      if (document.visibilityState === 'visible') void refreshBinding();
+    }
+
+    void refreshBinding();
+    window.addEventListener('focus', refreshWhenVisible);
+    document.addEventListener('visibilitychange', refreshWhenVisible);
+    return () => {
+      active = false;
+      window.removeEventListener('focus', refreshWhenVisible);
+      document.removeEventListener('visibilitychange', refreshWhenVisible);
+    };
+  }, [deviceId, session.profile?.deviceId, storageReady]);
 
   useEffect(() => {
     if (!deviceId) return undefined;
@@ -240,10 +278,8 @@ export function CampaignPage() {
         {track === 'learning' ? (
           <LearningTrack
             progress={session.progress}
-            dayTwoUnlocked={unlocks.dayTwo}
-            dayEightUnlocked={unlocks.dayEight}
-            certificateUnlocked={unlocks.certificate}
-            elapsedDays={unlocks.elapsedDays}
+            t1={aiEduBinding.t1}
+            t6={aiEduBinding.t6}
             onLearn={learn}
             onMockAiInteraction={mockAiInteraction}
             onAction={performAction}

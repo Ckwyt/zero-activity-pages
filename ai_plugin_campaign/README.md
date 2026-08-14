@@ -68,8 +68,11 @@ npm run build:deploy
 
 - `VITE_AI_EDU_API_MODE=production|mock`；
 - `VITE_AI_EDU_ADD_URL`。
+- `VITE_AI_EDU_HAS_BIND_URL`。
 
 V1 接口不经过 AES/Base64，也不依赖 `chrome.account360` 或 `window.external.AppCmd` 加密能力。项目在本地开发和正式构建中均默认使用 `production` 模式：只有接口明确返回 `code=0, flag=0` 后才写入本地存储；接口失败、业务占用或响应格式异常时都不会保存。纯 UI 联调需要跳过接口时，才可临时将 `VITE_AI_EDU_API_MODE` 显式设为 `mock`。学生占用和设备占用仍以正式服务端 `code/flag` 为准。
+
+读取到本地学生资料后，页面会调用 `POST /v1/ai/edu/has-bind` 同步服务端任务时间：`t1` 的次日解锁第 2–7 天体验任务，`t1` 所在自然日后的第 7 天解锁第 8 天总结任务，`t6` 存在时解锁证书领取。用户重新聚焦或返回活动页面时会自动刷新该状态。
 
 ## ZERO 浏览器能力
 

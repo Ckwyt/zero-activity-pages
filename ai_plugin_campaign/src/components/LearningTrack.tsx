@@ -1,8 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
+import { getDayEightUnlockTime, getLearningUnlocks } from '../services/campaignTime';
 import type { ActivityProgress } from '../types';
-
-// 活动联调期间暂时开放所有学习任务入口；需要恢复解锁限制时改为 true。
-const LEARNING_BUTTON_GATES_ENABLED = false;
 
 function GradientButton({
   children,
@@ -30,26 +28,33 @@ function GradientButton({
 
 export function LearningTrack({
   progress,
-  dayTwoUnlocked,
-  dayEightUnlocked,
-  certificateUnlocked,
-  elapsedDays,
+  t1,
+  t6,
   onLearn,
   onMockAiInteraction,
   onAction,
   onCertificate,
 }: {
   progress: ActivityProgress;
-  dayTwoUnlocked: boolean;
-  dayEightUnlocked: boolean;
-  certificateUnlocked: boolean;
-  elapsedDays: number;
+  t1: number;
+  t6: number;
   onLearn: () => void;
   onMockAiInteraction: () => void;
   onAction: (action: 'drive' | 'search' | 'skin' | 'pdf' | 'summary') => void;
   onCertificate: () => void;
 }) {
+  const [now, setNow] = useState(() => Date.now());
+  const unlocks = getLearningUnlocks({ t1, t6 }, new Date(now));
+  const { dayTwo: dayTwoUnlocked, dayEight: dayEightUnlocked, certificate: certificateUnlocked, elapsedDays } = unlocks;
+  const hasCompletedFirstCourse = t1 > 0;
   const waitingText = '完成首次 AI 对话后的次日 00:00 解锁';
+
+  useEffect(() => {
+    if (!hasCompletedFirstCourse || dayEightUnlocked) return undefined;
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, [hasCompletedFirstCourse, dayEightUnlocked]);
+
   return (
     <main className="learning-track">
       <section className="learning-intro section-shell">
@@ -78,7 +83,7 @@ export function LearningTrack({
               <button className="dev-complete" type="button" onClick={onMockAiInteraction}>开发预览：模拟首次 AI 对话</button>
             ) : null}
           </div>
-          {progress.firstAiInteractionAt ? <p className="status-note status-note--success">已完成首次 AI 对话，学习任务已记录</p> : null}
+          {hasCompletedFirstCourse ? <p className="status-note status-note--success">已完成首次 AI 对话，学习任务已记录</p> : null}
         </article>
       </section>
 
@@ -88,8 +93,8 @@ export function LearningTrack({
             <h2>一键转存，长期学习</h2>
             <p>浏览器内置 100G 网盘，课件文献网课视频统一存储，多端随取</p>
             <GradientButton
-              disabled={LEARNING_BUTTON_GATES_ENABLED && !dayTwoUnlocked}
-              title={LEARNING_BUTTON_GATES_ENABLED && !dayTwoUnlocked ? waitingText : undefined}
+              disabled={!dayTwoUnlocked}
+              title={!dayTwoUnlocked ? waitingText : undefined}
               onClick={() => onAction('drive')}
             >去保存</GradientButton>
           </div>
@@ -127,28 +132,28 @@ export function LearningTrack({
           <div className="section-title">
             <h2>进阶体验</h2>
             <span>第 2-7 天｜拓展内容一次性解锁</span>
-            {!dayTwoUnlocked && progress.firstAiInteractionAt ? <small>已完成第 {elapsedDays + 1} 天学习，次日 00:00 解锁</small> : null}
+            {!dayTwoUnlocked && hasCompletedFirstCourse ? <small>已完成第 {elapsedDays + 1} 天学习，次日 00:00 解锁</small> : null}
           </div>
           <div className="experience-list">
             <ExperienceItem
               title="AI搜索"
               description="一个搜索框，一键切换六大搜索引擎——AI搜索、豆包AI搜索、百度、Microsoft Bing、Google。写论文用学术、查资讯用综合、要答案用AI，各取所需，省内存又高效，全程无广告。"
               button="去搜索"
-              disabled={LEARNING_BUTTON_GATES_ENABLED && !dayTwoUnlocked}
+              disabled={!dayTwoUnlocked}
               onClick={() => onAction('search')}
             />
             <ExperienceItem
               title="AI换肤"
               description="一句话生成专属浏览器主题皮肤，开启个性化美学体验。"
               button="去换肤"
-              disabled={LEARNING_BUTTON_GATES_ENABLED && !dayTwoUnlocked}
+              disabled={!dayTwoUnlocked}
               onClick={() => onAction('skin')}
             />
             <ExperienceItem
               title="PDF 全能工具"
               description="免费格式转换、双语对照翻译、AI 文档总结，一键生成思维导图，PDF 常用操作一站完成。"
               button="去体验"
-              disabled={LEARNING_BUTTON_GATES_ENABLED && !dayTwoUnlocked}
+              disabled={!dayTwoUnlocked}
               onClick={() => onAction('pdf')}
             />
           </div>
@@ -159,14 +164,15 @@ export function LearningTrack({
         <div className="section-title">
           <h2>学习总结</h2>
           <LearningCountdown
-            firstAiInteractionAt={progress.firstAiInteractionAt}
+            t1={t1}
             unlocked={dayEightUnlocked}
+            now={now}
           />
           <span>第 8 天｜深度思考 AI 主题互动</span>
           <p>参与者登录 ZERO 浏览器活动专题，使用内置 AI 助手功能，围绕主题开展深度交流：自主提出人工智能在未来学习、校园生活、就业择业、创新创业领域能够落地的应用方向 / 场景设想，与 AI 进行对话探讨，保存完整互动截图。</p>
           <GradientButton
-            disabled={LEARNING_BUTTON_GATES_ENABLED && !dayEightUnlocked}
-            title={LEARNING_BUTTON_GATES_ENABLED && !dayEightUnlocked ? '完成首次 AI 对话后的第 8 天解锁' : undefined}
+            disabled={!dayEightUnlocked}
+            title={!dayEightUnlocked ? '完成首次 AI 对话后的第 8 天解锁' : undefined}
             onClick={() => onAction('summary')}
           >去学习并总结</GradientButton>
         </div>
@@ -180,7 +186,7 @@ export function LearningTrack({
           <button
             className="pill-button pill-button--white"
             type="button"
-            disabled={LEARNING_BUTTON_GATES_ENABLED && !certificateUnlocked}
+            disabled={!certificateUnlocked}
             onClick={onCertificate}
           >
             {progress.certificateGeneratedAt ? '查看学习证明' : '领取学习证明'}
@@ -189,18 +195,6 @@ export function LearningTrack({
       </section>
     </main>
   );
-}
-
-const BEIJING_OFFSET = 8 * 60 * 60 * 1000;
-
-function getDayEightUnlockTime(firstAiInteractionAt: string) {
-  const firstInteraction = new Date(firstAiInteractionAt);
-  const beijingTime = new Date(firstInteraction.getTime() + BEIJING_OFFSET);
-  return Date.UTC(
-    beijingTime.getUTCFullYear(),
-    beijingTime.getUTCMonth(),
-    beijingTime.getUTCDate() + 7,
-  ) - BEIJING_OFFSET;
 }
 
 function formatCountdown(remainingMilliseconds: number) {
@@ -214,23 +208,18 @@ function formatCountdown(remainingMilliseconds: number) {
 }
 
 function LearningCountdown({
-  firstAiInteractionAt,
+  t1,
   unlocked,
+  now,
 }: {
-  firstAiInteractionAt?: string;
+  t1: number;
   unlocked: boolean;
+  now: number;
 }) {
   const unlockTime = useMemo(
-    () => firstAiInteractionAt ? getDayEightUnlockTime(firstAiInteractionAt) : null,
-    [firstAiInteractionAt],
+    () => getDayEightUnlockTime(t1),
+    [t1],
   );
-  const [now, setNow] = useState(() => Date.now());
-
-  useEffect(() => {
-    if (!unlockTime || unlocked) return undefined;
-    const timer = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(timer);
-  }, [unlockTime, unlocked]);
 
   let content = '完成首次 AI 对话后开启';
   if (unlocked || (unlockTime !== null && unlockTime <= now)) content = '已解锁';

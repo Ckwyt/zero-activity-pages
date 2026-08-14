@@ -1,6 +1,10 @@
-import type { ActivityProgress } from '../types';
-
 const CHINA_TIME_ZONE = 'Asia/Shanghai';
+const BEIJING_OFFSET = 8 * 60 * 60 * 1000;
+
+interface LearningTaskTimestamps {
+  t1: number;
+  t6: number;
+}
 
 function chinaDateParts(value: Date | string) {
   const date = typeof value === 'string' ? new Date(value) : value;
@@ -19,17 +23,32 @@ export function chinaCalendarDayNumber(value: Date | string) {
   return Math.floor(Date.UTC(year, month - 1, day) / 86_400_000);
 }
 
-export function elapsedChinaCalendarDays(from: string, now = new Date()) {
+export function elapsedChinaCalendarDays(from: Date | string, now = new Date()) {
   return Math.max(0, chinaCalendarDayNumber(now) - chinaCalendarDayNumber(from));
 }
 
-export function getLearningUnlocks(progress: ActivityProgress, now = new Date()) {
-  const start = progress.firstAiInteractionAt;
-  const elapsed = start ? elapsedChinaCalendarDays(start, now) : -1;
+function isCompletedTimestamp(value: number) {
+  return Number.isSafeInteger(value) && value > 0;
+}
+
+export function getDayEightUnlockTime(t1: number) {
+  if (!isCompletedTimestamp(t1)) return null;
+  const firstInteraction = new Date(t1 * 1000);
+  const beijingTime = new Date(firstInteraction.getTime() + BEIJING_OFFSET);
+  return Date.UTC(
+    beijingTime.getUTCFullYear(),
+    beijingTime.getUTCMonth(),
+    beijingTime.getUTCDate() + 7,
+  ) - BEIJING_OFFSET;
+}
+
+export function getLearningUnlocks(task: LearningTaskTimestamps, now = new Date()) {
+  const hasT1 = isCompletedTimestamp(task.t1);
+  const elapsed = hasT1 ? elapsedChinaCalendarDays(new Date(task.t1 * 1000), now) : -1;
   return {
     dayTwo: elapsed >= 1,
     dayEight: elapsed >= 7,
-    certificate: Boolean(start && progress.summaryCompletedAt),
+    certificate: isCompletedTimestamp(task.t6),
     elapsedDays: Math.max(elapsed, 0),
   };
 }
