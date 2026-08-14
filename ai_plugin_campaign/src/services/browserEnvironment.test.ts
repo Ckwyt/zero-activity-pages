@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
+  applyParentDeviceInfo,
   detectBrowserEnvironment,
   isZeroBrowserVersionSupported,
 } from './browserEnvironment';
@@ -78,6 +79,19 @@ describe('ZERO browser environment detection', () => {
       canUseCampaignFeatures: true,
       canUseNativeNavigation: false,
       canReadNativeIdentity: false,
+    });
+  });
+
+  it('recognizes an iframe as ZERO when newpages returns device information', () => {
+    const browserEnvironment = detectBrowserEnvironment({ external: {}, chrome: {} });
+    expect(applyParentDeviceInfo(browserEnvironment, {
+      mid: '0123456789abcdef0123456789abcdef',
+      version: '2.0.1322.0',
+    })).toMatchObject({
+      isZeroBrowser: true,
+      browserVersion: '2.0.1322.0',
+      isOutdatedZeroBrowser: false,
+      canUseCampaignFeatures: true,
     });
   });
 });

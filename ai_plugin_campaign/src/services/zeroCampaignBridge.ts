@@ -1,6 +1,5 @@
 interface ZeroExternalBridge {
   GetSID(hostWindow: Window): string;
-  GetMID(): string;
   AppCmd(
     sid: string,
     module: string,
@@ -74,26 +73,6 @@ export function getZeroAccountLoginStatus(
       finish('unavailable');
     }
   });
-}
-
-export function getDeviceId() {
-  const bridge = getBridge();
-  if (typeof bridge?.GetMID === 'function') {
-    try {
-      const mid = bridge.GetMID();
-      if (typeof mid === 'string' && mid.trim()) return mid.trim();
-    } catch {
-      // A stable local id keeps desktop preview usable when the native bridge fails.
-    }
-  }
-  const key = 'zero.ai-plugin-campaign.preview-device-id';
-  const stored = localStorage.getItem(key);
-  if (stored && /^[\x00-\x7F]{32}$/.test(stored)) return stored;
-  const uuid = crypto.randomUUID?.().replaceAll('-', '');
-  const random = Array.from(crypto.getRandomValues(new Uint8Array(16)), (value) => value.toString(16).padStart(2, '0')).join('');
-  const generated = (uuid || random).slice(0, 32).padEnd(32, '0');
-  localStorage.setItem(key, generated);
-  return generated;
 }
 
 export function openZeroUrl(url: string) {

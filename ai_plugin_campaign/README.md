@@ -79,7 +79,9 @@ V1 接口不经过 AES/Base64，也不依赖 `chrome.account360` 或 `window.ext
 - `src/state/BrowserEnvironmentContext.tsx`；
 - `src/components/ZeroBrowserGate.tsx`。
 
-最低支持版本为 `2.0.1322.0`。`ZeroBrowserGate` 默认开启：普通浏览器会展示 ZERO 下载弹窗，低版本 ZERO 会展示更新提示。仅本地调试需要绕过门禁时，设置 `VITE_ZERO_BROWSER_GATE=off`。
+最低支持版本为 `2.0.1322.0`。`ZeroBrowserGate` 默认开启：普通浏览器会展示 ZERO 下载弹窗，低版本 ZERO 会展示更新提示。URL 参数优先于环境变量：开发地址使用 `/?zeroGate=off` 临时关闭、`/?zeroGate=on` 开启；正式 Hash 路由地址使用 `#/?zeroGate=off` 或 `#/?zeroGate=on`。删除参数后恢复 `VITE_ZERO_BROWSER_GATE` 配置及默认行为。
+
+多个 URL 参数使用 `&` 连接，例如 `/?stage=initial-review&zeroGate=off`。页面兼容误写的多个 `?`；同名参数重复时使用最后一个有效值，但建议每个参数只保留一次，避免阶段含义冲突。
 
 ZERO 原生业务动作集中在 `src/services/zeroCampaignBridge.ts`。页面会派发以下集成事件，浏览器侧可按正式协议接入：
 

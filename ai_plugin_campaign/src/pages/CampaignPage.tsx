@@ -22,33 +22,34 @@ import {
 } from '../services/campaignTime';
 import {
   dispatchZeroCampaignAction,
-  getDeviceId,
   openZeroUrl,
   requestZeroAccountLogin,
 } from '../services/zeroCampaignBridge';
+import { requestDeviceInfo } from '../services/postMessageAdapter';
+import {
+  getCurrentCampaignSearchValues,
+  readLastValidParameter,
+} from '../services/urlParameters';
 import type { ActivityProgress, CampaignSession, CampaignTrackId, StudentLoginPayload } from '../types';
 
 const emptyCampaignSession: CampaignSession = { profile: null, progress: {} };
+const competitionStages = ['before', 'submission', 'initial-review', 'showcase', 'awards'] as const;
 
 function readTrack(): CampaignTrackId {
-  const params = new URLSearchParams(window.location.search);
-  const query = params.get('track');
-  return query === 'competition' || readCompetitionStagePreview(params) ? 'competition' : 'learning';
+  const searchValues = getCurrentCampaignSearchValues();
+  const query = readLastValidParameter('track', ['learning', 'competition'] as const, ...searchValues);
+  return query === 'competition' || readCompetitionStagePreview(...searchValues) ? 'competition' : 'learning';
 }
 
-function readCompetitionStagePreview(params = new URLSearchParams(window.location.search)): CompetitionStage | null {
-  const stage = params.get('stage');
-  return stage === 'before'
-    || stage === 'submission'
-    || stage === 'initial-review'
-    || stage === 'showcase'
-    || stage === 'awards'
-    ? stage
-    : null;
+function readCompetitionStagePreview(
+  ...searchValues: Array<string | undefined>
+): CompetitionStage | null {
+  const sources = searchValues.length ? searchValues : getCurrentCampaignSearchValues();
+  return readLastValidParameter('stage', competitionStages, ...sources) ?? null;
 }
 
 export function CampaignPage() {
-  const deviceId = useMemo(getDeviceId, []);
+  const [deviceId, setDeviceId] = useState<string | null>(null);
   const [session, setSession] = useState<CampaignSession>(emptyCampaignSession);
   const [storageReady, setStorageReady] = useState(false);
   const [track, setTrack] = useState<CampaignTrackId>(readTrack);
@@ -76,6 +77,25 @@ export function CampaignPage() {
 
   useEffect(() => {
     let active = true;
+    void requestDeviceInfo().then(({ mid }) => {
+      if (!active) return;
+      console.info('[ZERO Device MID]', mid || '(empty)');
+      setDeviceId(mid);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (deviceId === null) return undefined;
+    if (!deviceId) {
+      setStorageReady(true);
+      setNotice('未获取到设备 MID，请从 ZERO 浏览器新标签页活动入口打开。');
+      return undefined;
+    }
+
+    let active = true;
     readCampaignSession(deviceId)
       .then((storedSession) => {
         if (active) setSession(storedSession);
@@ -93,8 +113,11 @@ export function CampaignPage() {
   }, [deviceId]);
 
   useEffect(() => {
+    if (!deviceId) return undefined;
+    const currentDeviceId = deviceId;
+
     function persistEventProgress(key: keyof ActivityProgress) {
-      void markProgress(deviceId, key)
+      void markProgress(currentDeviceId, key)
         .then(setSession)
         .catch((error) => {
           console.error('[Campaign Storage] 保存活动进度失败：', error);
@@ -137,6 +160,10 @@ export function CampaignPage() {
   }
 
   async function updateProgress(key: keyof ActivityProgress) {
+    if (!deviceId) {
+      setNotice('未获取到设备 MID，请从 ZERO 浏览器新标签页活动入口打开。');
+      return false;
+    }
     try {
       const next = await markProgress(deviceId, key);
       setSession(next);
@@ -233,11 +260,16 @@ export function CampaignPage() {
             onInstall={installWork}
           />
         ) : (
-          <CompetitionTrack onRules={() => setShowRules(true)} />
+          <CompetitionTrack
+            onRules={() => setShowRules(true)}
+            showRules={false}
+          />
         )}
       </div>
 
-      {storageReady && !session.profile ? <StudentLoginModal deviceId={deviceId} onSubmit={login} /> : null}
+      {storageReady && deviceId && !session.profile ? (
+        <StudentLoginModal deviceId={deviceId} onSubmit={login} />
+      ) : null}
       {showRules ? <RulesModal onClose={() => setShowRules(false)} /> : null}
       {showSubmissionEnded ? (
         <SubmissionEndedModal onClose={() => setShowSubmissionEnded(false)} />

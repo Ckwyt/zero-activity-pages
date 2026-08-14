@@ -1,8 +1,10 @@
-import { createContext, useContext, useMemo, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import {
+  applyParentDeviceInfo,
   detectBrowserEnvironment,
   type BrowserEnvironmentCapabilities,
 } from '../services/browserEnvironment';
+import { requestDeviceInfo } from '../services/postMessageAdapter';
 
 const BrowserEnvironmentContext = createContext<BrowserEnvironmentCapabilities | null>(null);
 
@@ -13,8 +15,23 @@ export function BrowserEnvironmentProvider({
   children: ReactNode;
   value?: BrowserEnvironmentCapabilities;
 }) {
-  // ZERO 原生桥会在页面模块脚本执行前注入，应用生命周期内检测一次即可。
-  const environment = useMemo(() => value ?? detectBrowserEnvironment(), [value]);
+  const nativeEnvironment = useMemo(() => value ?? detectBrowserEnvironment(), [value]);
+  const [environment, setEnvironment] = useState(nativeEnvironment);
+
+  useEffect(() => {
+    let active = true;
+    setEnvironment(nativeEnvironment);
+    if (value || nativeEnvironment.canUseCampaignFeatures) return () => { active = false; };
+
+    // iframe 页面没有 window.external，通过 newpages 父页面返回的设备信息确认 ZERO 环境。
+    void requestDeviceInfo().then((deviceInfo) => {
+      if (active) setEnvironment(applyParentDeviceInfo(nativeEnvironment, deviceInfo));
+    });
+    return () => {
+      active = false;
+    };
+  }, [nativeEnvironment, value]);
+
   return (
     <BrowserEnvironmentContext.Provider value={environment}>
       {children}

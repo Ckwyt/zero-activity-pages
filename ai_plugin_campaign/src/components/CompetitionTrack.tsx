@@ -15,12 +15,16 @@ const criteria = [
 
 export function CompetitionTrack({
   onRules,
+  showRules = true,
 }: {
   onRules: () => void;
+  showRules?: boolean;
 }) {
   return (
     <main className="competition-track">
-      <button className="rules-dock" type="button" onClick={onRules}><span>活动<br />规则</span></button>
+      {showRules ? (
+        <button className="rules-dock" type="button" onClick={onRules}><span>活动<br />规则</span></button>
+      ) : null}
       <section className="theme-section section-shell competition-section">
         <img
           className="theme-heading"

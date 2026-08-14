@@ -1,20 +1,41 @@
 import type { ReactNode } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   ZERO_BROWSER_DOWNLOAD_URL,
 } from '../services/browserEnvironment';
+import { readLastValidParameter } from '../services/urlParameters';
 import { useBrowserEnvironment } from '../state/BrowserEnvironmentContext';
 
+const zeroGateSettings = ['on', 'off'] as const;
+type ZeroGateSetting = typeof zeroGateSettings[number];
+
+function normalizeGateSetting(value: string | null | undefined): ZeroGateSetting | undefined {
+  const normalized = value?.trim().toLowerCase();
+  return normalized === 'on' || normalized === 'off' ? normalized : undefined;
+}
+
+export function readZeroBrowserGateSetting(...searchValues: Array<string | undefined>) {
+  return readLastValidParameter('zeroGate', zeroGateSettings, ...searchValues);
+}
+
 /**
- * ZERO 门禁默认开启。只有本地调试等明确场景设置为 off 时才跳过，
- * 避免环境变量缺失导致普通浏览器被意外放行。
+ * URL 参数优先于环境变量：?zeroGate=off 临时关闭，?zeroGate=on 开启。
+ * 未传 URL 参数时门禁默认开启，只有环境变量明确设置为 off 时才跳过。
  */
-export function isZeroBrowserGateEnabled(configuredValue?: string) {
-  return configuredValue !== 'off';
+export function isZeroBrowserGateEnabled(configuredValue?: string, urlSetting?: string) {
+  const normalizedUrlSetting = normalizeGateSetting(urlSetting);
+  if (normalizedUrlSetting) return normalizedUrlSetting === 'on';
+  return normalizeGateSetting(configuredValue) !== 'off';
 }
 
 export function ZeroBrowserGate({ children }: { children: ReactNode }) {
   const environment = useBrowserEnvironment();
-  const shouldEnforceGate = isZeroBrowserGateEnabled(import.meta.env.VITE_ZERO_BROWSER_GATE);
+  const location = useLocation();
+  const urlSetting = readZeroBrowserGateSetting(window.location.search, location.search);
+  const shouldEnforceGate = isZeroBrowserGateEnabled(
+    import.meta.env.VITE_ZERO_BROWSER_GATE,
+    urlSetting,
+  );
 
   if (!shouldEnforceGate || environment.canUseCampaignFeatures) return children;
 
