@@ -36,7 +36,7 @@ export const competitionConfig = {
   // 当天（含）以前可进入 PluginHub 上传；之后至初审截止日点击上传会显示截止弹窗。
   uploadDeadline: import.meta.env.VITE_UPLOAD_DEADLINE
     || import.meta.env.VITE_COMPETITION_END_AT
-    || '2026-09-01',
+    || '2026-08-01',
   // 该日期之后，首页按钮切换为“作品展示”。
   initialReviewDeadline: import.meta.env.VITE_INITIAL_REVIEW_DEADLINE || '2026-09-04',
   expertReviewDays: 10,
