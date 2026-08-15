@@ -7,6 +7,7 @@ const browserSdk = vi.hoisted(() => ({
 vi.mock('@q/browser-jssdk', () => browserSdk);
 
 import {
+  getChannelId,
   getDeviceId,
   getZeroAccountLoginStatus,
   isZeroAccountQtLoggedIn,
@@ -22,6 +23,74 @@ describe('ZERO device identity', () => {
 
   it('returns an empty MID when the SDK bridge is unavailable', () => {
     expect(getDeviceId(() => { throw new Error('bridge unavailable'); })).toBe('');
+  });
+});
+
+describe('ZERO channel identity', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('reads the channel id through feedback.GetPID', async () => {
+    const appCmd = vi.fn((
+      _sid: string,
+      _module: string,
+      _action: string,
+      _parameter: string,
+      _extra: string,
+      callback: (code: number, result: string) => void,
+    ) => callback(0, ' channel-123 '));
+
+    Object.defineProperty(window, 'external', {
+      configurable: true,
+      value: {
+        GetSID: vi.fn(() => 'test-sid'),
+        AppCmd: appCmd,
+      },
+    });
+
+    await expect(getChannelId()).resolves.toBe('channel-123');
+    expect(appCmd).toHaveBeenCalledWith(
+      'test-sid',
+      'feedback',
+      'GetPID',
+      '',
+      '',
+      expect.any(Function),
+    );
+  });
+
+  it('returns an empty channel id when the native command reports failure', async () => {
+    Object.defineProperty(window, 'external', {
+      configurable: true,
+      value: {
+        GetSID: vi.fn(() => 'test-sid'),
+        AppCmd: vi.fn((
+          _sid: string,
+          _module: string,
+          _action: string,
+          _parameter: string,
+          _extra: string,
+          callback: (code: number, result: string) => void,
+        ) => callback(1, 'invalid-channel')),
+      },
+    });
+
+    await expect(getChannelId()).resolves.toBe('');
+  });
+
+  it('returns an empty channel id when the native bridge is unavailable or times out', async () => {
+    Object.defineProperty(window, 'external', { configurable: true, value: {} });
+    await expect(getChannelId()).resolves.toBe('');
+
+    Object.defineProperty(window, 'external', {
+      configurable: true,
+      value: {
+        GetSID: vi.fn(() => 'test-sid'),
+        AppCmd: vi.fn(),
+      },
+    });
+    await expect(getChannelId(5)).resolves.toBe('');
   });
 });
 

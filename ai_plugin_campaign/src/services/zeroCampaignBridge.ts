@@ -92,6 +92,42 @@ export function getDeviceId(readMid: () => string = externalGetMID) {
   return normalizedMid;
 }
 
+/**
+ * 通过 ZERO 原生 feedback.GetPID 能力读取当前渠道号。
+ * 非 ZERO 环境、原生调用失败、返回错误码或超时时统一返回空字符串。
+ */
+export function getChannelId(timeoutMs = 3_000): Promise<string> {
+  const bridge = getBridge();
+  if (typeof bridge?.GetSID !== 'function' || typeof bridge.AppCmd !== 'function') {
+    return Promise.resolve('');
+  }
+
+  const getSid = bridge.GetSID;
+  const appCmd = bridge.AppCmd;
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (channelId: string) => {
+      if (settled) return;
+      settled = true;
+      globalThis.clearTimeout(timer);
+      resolve(channelId);
+    };
+    const timer = globalThis.setTimeout(() => finish(''), timeoutMs);
+
+    try {
+      const sid = getSid.call(bridge, window);
+      appCmd.call(bridge, sid, 'feedback', 'GetPID', '', '', (code, result) => {
+        const channelId = typeof result === 'string' ? result.trim() : '';
+        console.info('[ZERO Channel ID]', code, channelId || '(empty)');
+        finish(code === 0 || code === '0' ? channelId : '');
+      });
+    } catch (error) {
+      console.warn('[ZERO Channel ID] 获取失败：', error);
+      finish('');
+    }
+  });
+}
+
 export function openZeroUrl(url: string) {
   const bridge = getBridge();
   if (typeof bridge?.GetSID === 'function' && typeof bridge.AppCmd === 'function') {
