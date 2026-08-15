@@ -71,10 +71,14 @@ npm run build:deploy
 - `VITE_AI_EDU_API_MODE=production|mock`；
 - `VITE_AI_EDU_ADD_URL`。
 - `VITE_AI_EDU_HAS_BIND_URL`。
+- `VITE_AI_PRODUCTS_URL`。
 
 V1 接口不经过 AES/Base64，也不依赖 `chrome.account360` 或 `window.external.AppCmd` 加密能力。项目在本地开发和正式构建中均默认使用 `production` 模式：只有接口明确返回 `code=0, flag=0` 后才写入本地存储；接口失败、业务占用或响应格式异常时都不会保存。纯 UI 联调需要跳过接口时，才可临时将 `VITE_AI_EDU_API_MODE` 显式设为 `mock`。学生占用和设备占用仍以正式服务端 `code/flag` 为准。
 
 读取到本地学生资料后，页面会调用 `POST /v1/ai/edu/has-bind` 同步服务端任务时间：`t1` 的次日解锁第 2–7 天体验任务，`t1` 所在自然日后的第 7 天解锁第 8 天总结任务，`t6` 存在时解锁证书领取。用户重新聚焦或返回活动页面时会自动刷新该状态。
+
+作品展示页通过 `GET https://cloud.zbrowser.cn/v1/ai/products` 获取真实审核结果。初审作品展示使用 `kind=2`，获奖作品公示使用 `kind=4`；分页、学校精确筛选和作品名称/姓名/学校关键词搜索均由服务端处理。
+本地 `npm run dev` 使用 `/api/ai-products` Vite 代理访问同一正式接口，以规避接口仅允许正式站点域名的浏览器 CORS 限制；正式构建仍直接请求 `cloud.zbrowser.cn`。
 
 ## ZERO 浏览器能力
 

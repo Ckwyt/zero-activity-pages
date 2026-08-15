@@ -1,25 +1,35 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import { schools } from '../data/activity';
 import {
-  filterShowcaseWorks,
   getShowcasePageItems,
   AWARDS_PAGE_SIZE,
-  mockShowcaseWorks,
   SHOWCASE_PAGE_SIZE,
-  SHOWCASE_TOTAL_PAGES,
 } from '../data/showcase';
+import { getAiProducts, type AiProductsPage } from '../services/aiProductsApi';
+
+const EMPTY_PRODUCT_LOGO = '/assets/figma/showcase/zero-logo.png';
 
 export function CompetitionShowcase({
   awards = false,
   onInstall,
+  initialData,
 }: {
   awards?: boolean;
   onInstall?: (id: string) => void;
+  initialData?: AiProductsPage;
 }) {
+  const pageSize = awards ? AWARDS_PAGE_SIZE : SHOWCASE_PAGE_SIZE;
+  const productKind = awards ? 4 : 2;
   const [school, setSchool] = useState('');
   const [searchText, setSearchText] = useState('');
   const [keyword, setKeyword] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [productsPage, setProductsPage] = useState<AiProductsPage>(
+    () => initialData ?? { list: [], page: 1, size: pageSize, total: 0 },
+  );
+  const [loading, setLoading] = useState(!initialData);
+  const [loadError, setLoadError] = useState('');
+  const [reloadToken, setReloadToken] = useState(0);
   const [schoolListOpen, setSchoolListOpen] = useState(false);
   const [highlightedSchool, setHighlightedSchool] = useState(0);
   const sectionRef = useRef<HTMLElement>(null);
@@ -29,27 +39,53 @@ export function CompetitionShowcase({
     [],
   );
 
-  const pageSize = awards ? AWARDS_PAGE_SIZE : SHOWCASE_PAGE_SIZE;
-  const stageWorks = useMemo(
-    () => mockShowcaseWorks.slice(0, pageSize * SHOWCASE_TOTAL_PAGES),
-    [pageSize],
-  );
-  const filteredWorks = useMemo(
-    () => filterShowcaseWorks(stageWorks, school, keyword),
-    [keyword, school, stageWorks],
-  );
-  const totalPages = Math.ceil(filteredWorks.length / pageSize);
-  const currentWorks = filteredWorks.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize,
-  );
+  const totalPages = Math.ceil(productsPage.total / pageSize);
+  const currentWorks = productsPage.list;
   const pageItems = getShowcasePageItems(currentPage, totalPages);
 
   function submitSearch(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setKeyword(searchText);
+    setKeyword(searchText.trim());
     setCurrentPage(1);
+    setReloadToken((current) => current + 1);
   }
+
+  useEffect(() => {
+    const controller = new AbortController();
+    let active = true;
+    setLoading(true);
+    setLoadError('');
+
+    getAiProducts({
+      kind: productKind,
+      page: currentPage,
+      size: pageSize,
+      school,
+      key: keyword,
+    }, { signal: controller.signal })
+      .then((result) => {
+        if (!active) return;
+        const responseTotalPages = Math.ceil(result.total / pageSize);
+        if (responseTotalPages > 0 && currentPage > responseTotalPages) {
+          setCurrentPage(responseTotalPages);
+          return;
+        }
+        setProductsPage(result);
+      })
+      .catch((error) => {
+        if (!active || controller.signal.aborted) return;
+        setProductsPage({ list: [], page: currentPage, size: pageSize, total: 0 });
+        setLoadError(error instanceof Error ? error.message : '作品列表加载失败，请稍后重试');
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [currentPage, keyword, pageSize, productKind, reloadToken, school]);
 
   useEffect(() => {
     if (!schoolListOpen) return undefined;
@@ -122,6 +158,7 @@ export function CompetitionShowcase({
       id="showcase"
       className={`competition-showcase ${awards ? 'competition-showcase--awards' : 'competition-showcase--review'}`}
       ref={sectionRef}
+      aria-busy={loading}
     >
       <a
         className="rules-dock competition-showcase__rules"
@@ -184,29 +221,45 @@ export function CompetitionShowcase({
             <input
               value={searchText}
               onChange={(event) => setSearchText(event.target.value)}
-              placeholder="输入作品名称、姓名、学院搜索"
+              maxLength={64}
+              placeholder="输入作品名称、姓名、学校搜索"
               type="search"
             />
           </label>
-          <button className="showcase-search-button" type="submit">搜索</button>
+          <button className="showcase-search-button" type="submit" disabled={loading}>搜索</button>
         </form>
 
-        {currentWorks.length ? (
+        {loading ? (
+          <p className="showcase-feedback" role="status">作品加载中...</p>
+        ) : loadError ? (
+          <div className="showcase-feedback showcase-feedback--error" role="alert">
+            <p>{loadError}</p>
+            <button type="button" onClick={() => setReloadToken((current) => current + 1)}>重新加载</button>
+          </div>
+        ) : currentWorks.length ? (
           <div className="showcase-grid">
             {currentWorks.map((work) => (
               <article className={`showcase-card ${awards ? 'showcase-card--awards' : 'showcase-card--review'}`} key={work.id}>
                 <div className="showcase-card__cover">
-                  <img src={work.image} alt="" />
+                  <img
+                    src={work.logo || EMPTY_PRODUCT_LOGO}
+                    alt=""
+                    onError={(event) => {
+                      if (event.currentTarget.dataset.fallback === 'true') return;
+                      event.currentTarget.dataset.fallback = 'true';
+                      event.currentTarget.src = EMPTY_PRODUCT_LOGO;
+                    }}
+                  />
                 </div>
                 <div className="showcase-card__copy">
                   <h3>{work.title}</h3>
-                  <p>{work.description}</p>
+                  <p>{work.content}</p>
                 </div>
                 {awards ? (
                   <button
                     className="showcase-install-button"
                     type="button"
-                    onClick={() => onInstall?.(work.id)}
+                    onClick={() => onInstall?.(work.uid || String(work.id))}
                   >
                     安装到ZERO
                   </button>

@@ -6,6 +6,13 @@ export default defineConfig(({ mode }) => ({
   base: mode === 'online' ? './' : undefined,
   server: {
     port: 4175,
+    proxy: {
+      '/api/ai-products': {
+        target: 'https://cloud.zbrowser.cn',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/ai-products/, '/v1/ai/products'),
+      },
+    },
   },
   preview: {
     port: 4175,

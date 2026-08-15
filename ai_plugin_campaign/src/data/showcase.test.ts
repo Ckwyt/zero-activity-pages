@@ -1,30 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
-  filterShowcaseWorks,
   getShowcasePageItems,
   AWARDS_PAGE_SIZE,
-  mockShowcaseWorks,
   SHOWCASE_PAGE_SIZE,
-  SHOWCASE_TOTAL_PAGES,
 } from './showcase';
 
-describe('showcase mock catalog', () => {
-  it('provides twelve complete pages of deterministic mock data', () => {
+describe('showcase pagination presentation', () => {
+  it('keeps the stage-specific server page sizes', () => {
     expect(SHOWCASE_PAGE_SIZE).toBe(20);
     expect(AWARDS_PAGE_SIZE).toBe(16);
-    expect(mockShowcaseWorks).toHaveLength(SHOWCASE_TOTAL_PAGES * SHOWCASE_PAGE_SIZE);
-    expect(new Set(mockShowcaseWorks.map((work) => work.id)).size).toBe(mockShowcaseWorks.length);
-  });
-
-  it('filters by school and searches title, student name or college', () => {
-    const schoolResults = filterShowcaseWorks(mockShowcaseWorks, '清华大学', '');
-    expect(schoolResults.length).toBeGreaterThan(SHOWCASE_PAGE_SIZE);
-    expect(schoolResults.every((work) => work.school === '清华大学')).toBe(true);
-
-    const target = mockShowcaseWorks[37];
-    expect(filterShowcaseWorks(mockShowcaseWorks, '', target.studentName)).toContainEqual(target);
-    expect(filterShowcaseWorks(mockShowcaseWorks, target.school, target.college)).toContainEqual(target);
-    expect(filterShowcaseWorks(mockShowcaseWorks, '', '建筑设计').length).toBeGreaterThan(0);
   });
 
   it('builds compact pagination around the current page', () => {

@@ -341,6 +341,7 @@ p, h1, h2, h3, h4 { margin: 0; }
 .showcase-search-input input::-webkit-search-cancel-button { display: none; }
 .showcase-search-input input::placeholder { color: #bebebe; }
 .showcase-search-button { width: 106px; height: 44px; padding: 0; border: 0; border-radius: 8px; color: #fff; background: #4341e3; font-size: 16px; font-weight: 500; }
+.showcase-search-button:disabled { cursor: wait; opacity: .65; }
 .showcase-grid { display: grid; grid-template-columns: repeat(4,288px); column-gap: 16px; row-gap: 24px; margin-top: 19px; }
 .showcase-card { position: relative; width: 288px; height: 150px; overflow: hidden; border-radius: 8px; color: #333; background: #fff; }
 .showcase-card--awards { height: 207px; }
@@ -353,8 +354,12 @@ p, h1, h2, h3, h4 { margin: 0; }
 .showcase-install-button:hover { background: #0d0d0d; }
 .showcase-install-button:active { transform: translateY(1px); }
 .showcase-install-button:focus-visible { outline: 2px solid #7775ff; outline-offset: 2px; }
-.showcase-empty { display: grid; place-items: center; height: 150px; margin-top: 19px; color: #8a9cb4; }
+.showcase-empty,.showcase-feedback { display: grid; place-items: center; height: 150px; margin-top: 19px; color: #8a9cb4; }
 .competition-showcase--awards .showcase-empty { height: 207px; }
+.showcase-feedback { align-content: center; gap: 14px; text-align: center; }
+.competition-showcase--awards .showcase-feedback { height: 207px; }
+.showcase-feedback--error { color: #ffb4b4; }
+.showcase-feedback--error button { min-width: 96px; height: 36px; padding: 0 18px; border: 1px solid #7775ff; border-radius: 8px; color: #fff; background: #4341e3; font-size: 14px; }
 .showcase-pagination { display: flex; align-items: center; justify-content: center; height: 88px; gap: 4px; margin-top: 24px; padding-block: 24px; }
 .showcase-pagination button,.showcase-pagination span { display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 8px; color: #727880; background: #f5f5f5; font-size: 14px; line-height: 20px; }
 .showcase-pagination button.is-current { color: #fff; background: #4341e3; }
