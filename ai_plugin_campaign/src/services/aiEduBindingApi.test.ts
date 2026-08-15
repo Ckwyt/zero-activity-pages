@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
   AI_EDU_HAS_BIND_URL,
-  AiEduBindingApiError,
+  DEFAULT_AI_EDU_BINDING,
   getAiEduBinding,
 } from './aiEduBindingApi';
 
@@ -41,13 +41,13 @@ describe('AI education binding API', () => {
     await expect(getAiEduBinding(mid, { fetcher })).resolves.toEqual({ hasBind: false, t1: 0, t6: 0 });
   });
 
-  it('rejects invalid MIDs before sending a request', async () => {
+  it('uses zero defaults for invalid MIDs without sending a request', async () => {
     const fetcher = vi.fn();
-    await expect(getAiEduBinding('short-mid', { fetcher })).rejects.toBeInstanceOf(AiEduBindingApiError);
+    await expect(getAiEduBinding('short-mid', { fetcher })).resolves.toEqual(DEFAULT_AI_EDU_BINDING);
     expect(fetcher).not.toHaveBeenCalled();
   });
 
-  it('maps Pika failures to a retryable progress error', async () => {
+  it('uses zero defaults for business errors', async () => {
     const fetcher = vi.fn(async () => new Response(JSON.stringify({
       code: 13,
       msg: '内部错误，请稍后重试',
@@ -55,10 +55,30 @@ describe('AI education binding API', () => {
       flag: 12,
     }), { status: 200, headers: { 'Content-Type': 'application/json' } }));
 
-    await expect(getAiEduBinding(mid, { fetcher })).rejects.toMatchObject({
-      code: 13,
-      flag: 12,
-      message: '学习进度查询失败，请稍后重试',
-    });
+    await expect(getAiEduBinding(mid, { fetcher })).resolves.toEqual(DEFAULT_AI_EDU_BINDING);
+  });
+
+  it.each([
+    ['network failure', vi.fn(async () => { throw new TypeError('Failed to fetch'); })],
+    ['HTTP failure', vi.fn(async () => new Response('server error', { status: 500 }))],
+    ['invalid JSON', vi.fn(async () => new Response('not-json', { status: 200 }))],
+  ])('uses zero defaults for %s', async (_scenario, fetcher) => {
+    await expect(getAiEduBinding(mid, { fetcher })).resolves.toEqual(DEFAULT_AI_EDU_BINDING);
+  });
+
+  it.each([
+    [{ hasBind: true }, { hasBind: true, t1: 0, t6: 0 }],
+    [{ hasBind: true, t1: 123 }, { hasBind: true, t1: 0, t6: 0 }],
+    [{ hasBind: true, t1: 123, t6: null }, { hasBind: true, t1: 0, t6: 0 }],
+    [{ hasBind: true, t1: -1, t6: 456 }, { hasBind: true, t1: 0, t6: 0 }],
+  ])('sets both timestamps to zero when either timestamp is unavailable: %o', async (data, expected) => {
+    const fetcher = vi.fn(async () => new Response(JSON.stringify({
+      code: 0,
+      msg: 'ok',
+      data,
+      flag: 0,
+    }), { status: 200, headers: { 'Content-Type': 'application/json' } }));
+
+    await expect(getAiEduBinding(mid, { fetcher })).resolves.toEqual(expected);
   });
 });

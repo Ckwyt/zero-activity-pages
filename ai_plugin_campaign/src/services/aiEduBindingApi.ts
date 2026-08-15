@@ -6,6 +6,12 @@ export interface AiEduBindingData {
   t6: number;
 }
 
+export const DEFAULT_AI_EDU_BINDING: AiEduBindingData = {
+  hasBind: false,
+  t1: 0,
+  t6: 0,
+};
+
 interface AiEduBindingResponse {
   code: number;
   msg: string;
@@ -41,10 +47,15 @@ function isTimestamp(value: unknown) {
   return typeof value === 'number' && Number.isSafeInteger(value) && value >= 0;
 }
 
-function isBindingData(value: unknown): value is AiEduBindingData {
-  if (!value || typeof value !== 'object') return false;
+function normalizeBindingData(value: unknown): AiEduBindingData | null {
+  if (!value || typeof value !== 'object') return null;
   const data = value as Record<string, unknown>;
-  return typeof data.hasBind === 'boolean' && isTimestamp(data.t1) && isTimestamp(data.t6);
+  const hasBothTimestamps = isTimestamp(data.t1) && isTimestamp(data.t6);
+  return {
+    hasBind: typeof data.hasBind === 'boolean' ? data.hasBind : false,
+    t1: hasBothTimestamps ? data.t1 as number : 0,
+    t6: hasBothTimestamps ? data.t6 as number : 0,
+  };
 }
 
 function isBindingResponse(value: unknown): value is AiEduBindingResponse {
@@ -66,7 +77,7 @@ function getBindingErrorMessage(response: Pick<AiEduBindingResponse, 'code' | 'f
     ?? '学习进度查询失败，请稍后重试';
 }
 
-export async function getAiEduBinding(mid: string, options: AiEduBindingApiOptions = {}) {
+async function requestAiEduBinding(mid: string, options: AiEduBindingApiOptions = {}) {
   const requestBody = new URLSearchParams({ jb: JSON.stringify({ mid: normalizeMid(mid) }) });
   let response: Response;
   try {
@@ -96,6 +107,15 @@ export async function getAiEduBinding(mid: string, options: AiEduBindingApiOptio
   if (result.code !== 0 || result.flag !== 0) {
     throw new AiEduBindingApiError(getBindingErrorMessage(result), result.code, result.flag);
   }
-  if (!isBindingData(result.data)) throw new AiEduBindingApiError('学习进度接口返回格式错误');
-  return result.data;
+  const binding = normalizeBindingData(result.data);
+  if (!binding) throw new AiEduBindingApiError('学习进度接口返回格式错误');
+  return binding;
+}
+
+export async function getAiEduBinding(mid: string, options: AiEduBindingApiOptions = {}) {
+  try {
+    return await requestAiEduBinding(mid, options);
+  } catch {
+    return { ...DEFAULT_AI_EDU_BINDING };
+  }
 }

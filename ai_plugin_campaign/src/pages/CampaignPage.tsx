@@ -9,7 +9,11 @@ import { RulesModal } from '../components/RulesModal';
 import { StudentLoginModal } from '../components/StudentLoginModal';
 import { SubmissionEndedModal } from '../components/SubmissionEndedModal';
 import { activityLinks, competitionConfig } from '../data/activity';
-import { getAiEduBinding, type AiEduBindingData } from '../services/aiEduBindingApi';
+import {
+  DEFAULT_AI_EDU_BINDING,
+  getAiEduBinding,
+  type AiEduBindingData,
+} from '../services/aiEduBindingApi';
 import {
   markProgress,
   readCampaignSession,
@@ -34,7 +38,7 @@ import {
 import type { ActivityProgress, CampaignSession, CampaignTrackId, StudentLoginPayload } from '../types';
 
 const emptyCampaignSession: CampaignSession = { profile: null, progress: {} };
-const emptyAiEduBinding: AiEduBindingData = { hasBind: false, t1: 0, t6: 0 };
+const emptyAiEduBinding: AiEduBindingData = DEFAULT_AI_EDU_BINDING;
 const competitionStages = ['before', 'submission', 'initial-review', 'showcase', 'awards'] as const;
 
 function readTrack(): CampaignTrackId {
@@ -122,7 +126,7 @@ export function CampaignPage() {
         if (active) setAiEduBinding(result);
       } catch (error) {
         console.error('[AI EDU Binding] 查询设备学习进度失败：', error);
-        if (active) setNotice(error instanceof Error ? error.message : '学习进度查询失败，请稍后重试');
+        if (active) setAiEduBinding(emptyAiEduBinding);
       } finally {
         requesting = false;
       }
