@@ -59,6 +59,41 @@ describe('ZERO campaign URL navigation', () => {
     );
   });
 
+  it('does not report a false failure when ZERO opens the page and callbacks with code 1', async () => {
+    const appCmd = vi.fn((
+      _sid: string,
+      _module: string,
+      _action: string,
+      _parameter: string,
+      _extra: string,
+      callback: (code: number, result: string) => void,
+    ) => callback(1, 'opened'));
+
+    Object.defineProperty(window, 'external', {
+      configurable: true,
+      value: {
+        GetSID: vi.fn(() => 'test-sid'),
+        AppCmd: appCmd,
+      },
+    });
+
+    await expect(openZeroUrl('https://www.zbrowser.cn/PluginHub/')).resolves.toBeUndefined();
+    expect(appCmd).toHaveBeenCalledOnce();
+  });
+
+  it('still reports synchronous native bridge errors', async () => {
+    Object.defineProperty(window, 'external', {
+      configurable: true,
+      value: {
+        GetSID: vi.fn(() => 'test-sid'),
+        AppCmd: vi.fn(() => { throw new Error('bridge unavailable'); }),
+      },
+    });
+
+    await expect(openZeroUrl('https://www.zbrowser.cn/PluginHub/'))
+      .rejects.toThrow('bridge unavailable');
+  });
+
   it('opens a new browser window when the ZERO native bridge is unavailable', async () => {
     Object.defineProperty(window, 'external', { configurable: true, value: {} });
     const open = vi.spyOn(window, 'open').mockImplementation(() => null);

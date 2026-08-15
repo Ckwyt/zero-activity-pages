@@ -100,10 +100,12 @@ export function openZeroUrl(url: string) {
     return new Promise<void>((resolve, reject) => {
       try {
         const sid = getSid.call(bridge, window);
-        appCmd.call(bridge, sid, '', 'main.openurl', url, '', (code) => {
-          if (code === 0 || code === '0') resolve();
-          else reject(new Error(`ZERO 打开页面失败（${String(code)}）`));
+        appCmd.call(bridge, sid, '', 'main.openurl', url, '', (code, result) => {
+          // main.openurl 在部分 ZERO 版本中打开成功后会回调 1。
+          // @q/browser-jssdk 的 externalOpenNewTab 同样只发送命令，不依据该回调判定成败。
+          console.info('[ZERO main.openurl]', code, result);
         });
+        resolve();
       } catch (error) {
         reject(error);
       }
