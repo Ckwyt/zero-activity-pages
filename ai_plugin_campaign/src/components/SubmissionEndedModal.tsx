@@ -25,7 +25,7 @@ export function SubmissionEndedModal({ onClose }: { onClose: () => void }) {
         aria-labelledby="submission-ended-title"
         aria-describedby="submission-ended-status"
       >
-        <h2 id="submission-ended-title">活动已结束!</h2>
+        <h2 id="submission-ended-title">活动已结束！</h2>
         <p id="submission-ended-status">初审中</p>
         <button
           className="pill-button pill-button--purple submission-ended-modal__action"
