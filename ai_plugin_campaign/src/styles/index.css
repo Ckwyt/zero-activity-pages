@@ -247,19 +247,18 @@ p, h1, h2, h3, h4 { margin: 0; }
 .campaign-app--competition { background: #121b29; color: #fff; }
 .campaign-app--competition .campaign-hero { z-index: 0; }
 .competition-track { position: relative; z-index: 1; isolation: isolate; }
-.competition-track::before {
-  content: "";
+.competition-track__aura {
   position: absolute;
   z-index: 0;
   top: -125px;
-  left: 50%;
+  left: calc(50% + 1px);
   width: 658px;
   height: 436px;
   transform: translateX(-50%);
   filter: blur(17px);
-  background: url('/assets/figma/theme-aura.png') center/contain no-repeat;
   pointer-events: none;
 }
+.competition-track__aura img { width: 100%; height: 100%; max-width: none; object-fit: contain; }
 .competition-section { width: min(1200px, calc(100% - 48px)); padding-top: 47px; }
 .theme-heading,.award-heading { width: min(298px,100%); height: auto; margin-inline: auto; }
 .schedule-heading { width: min(516px,100%); height: auto; margin-inline: auto; }
@@ -375,17 +374,13 @@ p, h1, h2, h3, h4 { margin: 0; }
 }
 
 /*
- * 2K / 4K 屏幕不再继续放大以 1440px 设计稿为基准的背景图。
- * 图片保持原始宽高比居中，左右区域由各区块底色自然延展，避免超宽屏严重裁切和低清放大。
+ * 2K / 4K 屏幕下限制学习赛道和内容区装饰背景继续放大。
+ * 赛事 Hero 保持 cover 整个画布，避免固定宽度图片在两侧产生接缝。
  */
 @media (min-width: 1920px) {
   .campaign-hero--learning {
     background-image: url('/assets/figma/learning-hero.png'), linear-gradient(90deg,#dfffff,#fdfcfe);
     background-size: auto 856px, 100% 100%;
-  }
-  .campaign-hero--competition {
-    background-image: url('/assets/figma/competition-hero.png'), linear-gradient(90deg,#0e1627,#0d1726);
-    background-size: auto 767px, 100% 100%;
   }
   .advanced-section__surface {
     background-image: url('/assets/figma/advanced-bg.png'), linear-gradient(90deg,#e5e1fe,#f3fcfc);
@@ -558,7 +553,7 @@ p, h1, h2, h3, h4 { margin: 0; }
   .learning-intro { padding-top: 48px; }.learning-intro__desktop-break { display: none; }.course-card { min-height: auto; margin-top: 36px; padding: 52px 20px 35px; background: linear-gradient(145deg,#f5f3ff,#fff 45%,#effbff); box-shadow: 0 15px 50px rgba(73,66,212,.15); }.course-card h3 { line-height: 29px; }.course-card ol { margin-top: 8px; font-size: 14px; line-height: 25px; text-align: left; }
   .drive-preview-stage { margin-top: 45px; }.advanced-section { height: auto; min-height: 0; margin-top: -70px; padding-block: 50px; }.experience-item { align-items: flex-start; flex-direction: column; gap: 18px; }.experience-item > div { max-width: none; }.experience-item .pill-button { width: 100%; min-height: 48px; }
   .summary-section { min-height: 400px; }.certificate-section { padding-block: 50px; }
-  .competition-track::before { top: -100px; width: 540px; height: 358px; }
+  .competition-track__aura { top: -100px; width: 540px; height: 358px; }
   .theme-section { min-height: 820px; }.theme-card { min-height: auto; padding: 40px 18px; border: 1px solid #484d63; border-radius: 20px; background: rgba(255,255,255,.035); }.theme-card p,.theme-card ol { font-size: 14px; line-height: 26px; }.theme-card h3 { line-height: 26px; }.theme-card > span { margin-top: 30px; }
   .schedule-board { margin-top: 45px; }.schedule-board > div { padding: 30px 20px; }.timeline-panel h4 { font-size: 20px; }.timeline-panel p { font-size: 14px; }.criteria-panel { padding-inline: 20px !important; }.criteria-panel > div { grid-template-columns: 1fr; }.criteria-panel article { width: auto; height: auto; min-height: 140px; }.awards-grid { grid-template-columns: 1fr; }.awards-grid article,.awards-grid .award--creative { height: auto; min-height: 146px; }.awards-grid .award--creative { grid-column: auto; }
   .competition-showcase { min-height: calc(100vh - 520px); padding: 42px 0 64px; }
