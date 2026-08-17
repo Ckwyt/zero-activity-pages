@@ -29,6 +29,55 @@ npm run build
 
 生产入口：`dist/ai-plugin-campaign.html`。
 
+## GitHub Pages 对外静态预览
+
+项目已提供 GitHub Pages 专用构建和自动发布工作流。静态预览不会检测 ZERO
+浏览器，不会读取或写入学生本地数据，也不会请求学生、学习进度或作品列表接口；
+作品列表使用仓库内置演示数据，因此适合直接分享给公司外部人员。
+
+将仓库推送到 GitHub 后，在仓库的 **Settings → Pages → Build and deployment**
+中把 Source 设为 **GitHub Actions**。推送 `master` 或 `main` 分支后，
+`.github/workflows/deploy-ai-plugin-campaign-pages.yml` 会自动测试、构建和发布。
+
+站点基础地址格式为：
+
+```text
+https://<GitHub 用户名或组织名>.github.io/<仓库名>/
+```
+
+分享时在基础地址后追加 `#/?preview=...`：
+
+| 页面效果 | URL 参数 |
+| --- | --- |
+| 学习赛道（未解锁） | `#/?preview=learning-locked` |
+| 学习赛道（全部解锁） | `#/?preview=learning-unlocked` |
+| 赛事未开始 | `#/?preview=competition-before` |
+| 作品征集期 | `#/?preview=competition-submission` |
+| 作品初审中 | `#/?preview=competition-review` |
+| 初审作品展示 | `#/?preview=competition-showcase` |
+| 获奖作品展示 | `#/?preview=competition-awards` |
+| 活动登录弹窗 | `#/?preview=login` |
+| 活动规则弹窗 | `#/?preview=rules` |
+| 投稿结束弹窗 | `#/?preview=submission-ended` |
+| 学习证明弹窗 | `#/?preview=certificate` |
+| 非 ZERO 浏览器提示 | `#/?preview=browser-gate` |
+
+例如仓库地址是 `https://github.com/acme/zero-activity-pages`，则“获奖作品展示”
+的完整分享链接为：
+
+```text
+https://acme.github.io/zero-activity-pages/#/?preview=competition-awards
+```
+
+本地验证 GitHub Pages 产物：
+
+```bash
+npm run build:github
+npm run preview -- --host 127.0.0.1
+```
+
+然后访问 `http://127.0.0.1:4175/#/?preview=learning-unlocked`。
+
 ## 构建并发布到 ZERO CDN
 
 参考 ZERO 扩展中心项目的上传方式，在已安装并登录 `qupload` 的环境中执行：

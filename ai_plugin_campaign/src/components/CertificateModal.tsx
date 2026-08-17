@@ -38,10 +38,10 @@ export function CertificateModal({
         </button>
         <h2 id="certificate-title">领取学习证明</h2>
         <div className="certificate">
-          <img className="certificate__background" src="/assets/figma/certificate-bg.png" alt="" />
+          <img className="certificate__background" src="assets/figma/certificate-bg.png" alt="" />
           <div className="certificate__content">
             <h3>学习证明</h3>
-            <img className="certificate__divider" src="/assets/figma/certificate-divider.png" alt="" />
+            <img className="certificate__divider" src="assets/figma/certificate-divider.png" alt="" />
             <p className="certificate__name">姓名：<strong>{studentName}</strong></p>
             <p className="certificate__body">
               恭喜您已完成「智启青年·洞见AI未来」活动的全部学习内容，并达到本项目规定的学习要求，表现符合结业标准。

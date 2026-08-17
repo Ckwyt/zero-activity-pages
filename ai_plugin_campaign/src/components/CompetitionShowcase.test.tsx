@@ -73,6 +73,14 @@ describe('CompetitionShowcase award actions', () => {
     expect(awards).toContain('href="?stage=submission"');
   });
 
+  it('keeps the rules link inside the static GitHub preview', () => {
+    const showcase = renderToStaticMarkup(
+      <CompetitionShowcase initialData={reviewPage} staticMode />,
+    );
+
+    expect(showcase).toContain('href="#/?preview=rules"');
+  });
+
   it('uses API fields for the card logo, title and content', () => {
     const showcase = renderToStaticMarkup(<CompetitionShowcase initialData={{
       ...reviewPage,

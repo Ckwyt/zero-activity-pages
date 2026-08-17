@@ -35,11 +35,52 @@ import {
   readLastValidParameter,
   readLearningPreviewSetting,
 } from '../services/urlParameters';
+import {
+  getCurrentStaticPreview,
+  isCompetitionPreview,
+  type StaticPreviewView,
+} from '../services/staticPreview';
 import type { ActivityProgress, CampaignSession, CampaignTrackId, StudentLoginPayload } from '../types';
 
 const emptyCampaignSession: CampaignSession = { profile: null, progress: {} };
 const emptyAiEduBinding: AiEduBindingData = DEFAULT_AI_EDU_BINDING;
 const competitionStages = ['before', 'submission', 'initial-review', 'showcase', 'awards'] as const;
+const staticPreviewDeviceId = 'preview-device-id-000000000000000';
+
+function getStaticPreviewSession(view: StaticPreviewView | undefined): CampaignSession {
+  if (!view) return emptyCampaignSession;
+  return {
+    profile: view === 'login' ? null : {
+      school: '演示大学',
+      name: '演示同学',
+      studentNumber: '20260001',
+      deviceId: staticPreviewDeviceId,
+      loggedInAt: '2026-08-17T00:00:00.000Z',
+    },
+    progress: {},
+  };
+}
+
+function getStaticPreviewBinding(view: StaticPreviewView | undefined): AiEduBindingData {
+  if (view !== 'learning-unlocked' && view !== 'certificate') return emptyAiEduBinding;
+  const completedAt = Math.floor(Date.now() / 1000) - 8 * 86_400;
+  return { hasBind: true, t1: completedAt, t6: completedAt + 7 * 86_400 };
+}
+
+function getStaticPreviewCompetitionStage(
+  view: StaticPreviewView | undefined,
+): CompetitionStage | null {
+  const stages: Partial<Record<StaticPreviewView, CompetitionStage>> = {
+    'competition-before': 'before',
+    'competition-submission': 'submission',
+    'competition-review': 'initial-review',
+    'competition-showcase': 'showcase',
+    'competition-awards': 'awards',
+    rules: 'submission',
+    'submission-ended': 'initial-review',
+  };
+  return view ? stages[view] ?? null : null;
+}
 
 function readTrack(): CampaignTrackId {
   const searchValues = getCurrentCampaignSearchValues();
@@ -55,20 +96,38 @@ function readCompetitionStagePreview(
 }
 
 export function CampaignPage() {
-  const deviceId = useMemo(getDeviceId, []);
-  const [session, setSession] = useState<CampaignSession>(emptyCampaignSession);
-  const [aiEduBinding, setAiEduBinding] = useState<AiEduBindingData>(emptyAiEduBinding);
-  const [storageReady, setStorageReady] = useState(false);
-  const [track, setTrack] = useState<CampaignTrackId>(readTrack);
-  const [showRules, setShowRules] = useState(false);
-  const [showCertificate, setShowCertificate] = useState(false);
-  const [showSubmissionEnded, setShowSubmissionEnded] = useState(false);
+  const staticPreview = useMemo(getCurrentStaticPreview, []);
+  const isStaticPreview = Boolean(staticPreview);
+  const deviceId = useMemo(
+    () => isStaticPreview ? staticPreviewDeviceId : getDeviceId(),
+    [isStaticPreview],
+  );
+  const [session, setSession] = useState<CampaignSession>(
+    () => getStaticPreviewSession(staticPreview),
+  );
+  const [aiEduBinding, setAiEduBinding] = useState<AiEduBindingData>(
+    () => getStaticPreviewBinding(staticPreview),
+  );
+  const [storageReady, setStorageReady] = useState(isStaticPreview);
+  const [track, setTrack] = useState<CampaignTrackId>(
+    () => isCompetitionPreview(staticPreview) ? 'competition' : readTrack(),
+  );
+  const [showRules, setShowRules] = useState(staticPreview === 'rules');
+  const [showCertificate, setShowCertificate] = useState(staticPreview === 'certificate');
+  const [showSubmissionEnded, setShowSubmissionEnded] = useState(
+    staticPreview === 'submission-ended',
+  );
   const [notice, setNotice] = useState('');
   const forceAllLearningTasksUnlocked = useMemo(
-    () => readLearningPreviewSetting(...getCurrentCampaignSearchValues()) === 'all',
-    [],
+    () => staticPreview === 'learning-unlocked'
+      || staticPreview === 'certificate'
+      || readLearningPreviewSetting(...getCurrentCampaignSearchValues()) === 'all',
+    [staticPreview],
   );
-  const previewCompetitionStage = useMemo(readCompetitionStagePreview, []);
+  const previewCompetitionStage = useMemo(
+    () => getStaticPreviewCompetitionStage(staticPreview) ?? readCompetitionStagePreview(),
+    [staticPreview],
+  );
   const competitionStage = previewCompetitionStage ?? getCompetitionStage(
     new Date(),
     competitionConfig.startAt,
@@ -86,6 +145,7 @@ export function CampaignPage() {
   }[competitionStage] as [string, boolean, boolean];
 
   useEffect(() => {
+    if (isStaticPreview) return undefined;
     if (!deviceId) {
       setStorageReady(true);
       setNotice('未获取到设备 MID，请使用 ZERO 浏览器重新打开活动页面。');
@@ -107,9 +167,10 @@ export function CampaignPage() {
     return () => {
       active = false;
     };
-  }, [deviceId]);
+  }, [deviceId, isStaticPreview]);
 
   useEffect(() => {
+    if (isStaticPreview) return undefined;
     const storedStudentDeviceId = session.profile?.deviceId;
     if (!storageReady || !deviceId || !storedStudentDeviceId) {
       setAiEduBinding(emptyAiEduBinding);
@@ -144,9 +205,10 @@ export function CampaignPage() {
       window.removeEventListener('focus', refreshWhenVisible);
       document.removeEventListener('visibilitychange', refreshWhenVisible);
     };
-  }, [deviceId, session.profile?.deviceId, storageReady]);
+  }, [deviceId, isStaticPreview, session.profile?.deviceId, storageReady]);
 
   useEffect(() => {
+    if (isStaticPreview) return undefined;
     if (!deviceId) return undefined;
     const currentDeviceId = deviceId;
 
@@ -177,9 +239,10 @@ export function CampaignPage() {
       window.removeEventListener('zero-campaign:first-ai-interaction', onFirstAiInteraction);
       window.removeEventListener('zero-campaign:experience-completed', onExperienceCompleted);
     };
-  }, [deviceId]);
+  }, [deviceId, isStaticPreview]);
 
   async function login(payload: StudentLoginPayload) {
+    if (isStaticPreview) return '当前为静态预览，不会提交或保存登录信息。';
     let next;
     try {
       next = await submitStudentLogin(payload);
@@ -193,6 +256,10 @@ export function CampaignPage() {
   }
 
   async function updateProgress(key: keyof ActivityProgress) {
+    if (isStaticPreview) {
+      setNotice('当前为静态预览，不会执行真实业务操作。');
+      return false;
+    }
     if (!deviceId) {
       setNotice('未获取到设备 MID，请使用 ZERO 浏览器重新打开活动页面。');
       return false;
@@ -238,6 +305,10 @@ export function CampaignPage() {
   }
 
   async function openPluginHub() {
+    if (isStaticPreview) {
+      setNotice('当前为静态预览，不会打开正式业务页面。');
+      return;
+    }
     dispatchZeroCampaignAction('plugin-hub-opened');
     try {
       await openZeroUrl(activityLinks.pluginGenerator);
@@ -262,6 +333,10 @@ export function CampaignPage() {
   }
 
   function installWork(id: string) {
+    if (isStaticPreview) {
+      setNotice('当前为静态预览，不会安装作品。');
+      return;
+    }
     dispatchZeroCampaignAction('plugin-install', { pluginId: id });
   }
 
@@ -298,6 +373,7 @@ export function CampaignPage() {
           <CompetitionShowcase
             awards={competitionStage === 'awards'}
             onInstall={installWork}
+            staticMode={isStaticPreview}
           />
         ) : (
           <CompetitionTrack

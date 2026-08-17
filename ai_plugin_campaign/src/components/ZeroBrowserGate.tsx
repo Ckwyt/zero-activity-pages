@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import {
   ZERO_BROWSER_DOWNLOAD_URL,
 } from '../services/browserEnvironment';
+import { readStaticPreview } from '../services/staticPreview';
 import { readLastValidParameter } from '../services/urlParameters';
 import { useBrowserEnvironment } from '../state/BrowserEnvironmentContext';
 
@@ -31,11 +32,17 @@ export function isZeroBrowserGateEnabled(configuredValue?: string, urlSetting?: 
 export function ZeroBrowserGate({ children }: { children: ReactNode }) {
   const environment = useBrowserEnvironment();
   const location = useLocation();
-  const urlSetting = readZeroBrowserGateSetting(window.location.search, location.search);
-  const shouldEnforceGate = isZeroBrowserGateEnabled(
-    import.meta.env.VITE_ZERO_BROWSER_GATE,
-    urlSetting,
+  const preview = readStaticPreview(
+    window.location.search,
+    window.location.hash,
+    location.search,
   );
+  const urlSetting = readZeroBrowserGateSetting(window.location.search, location.search);
+  const shouldEnforceGate = preview === 'browser-gate'
+    || (!preview && isZeroBrowserGateEnabled(
+      import.meta.env.VITE_ZERO_BROWSER_GATE,
+      urlSetting,
+    ));
 
   if (!shouldEnforceGate || environment.canUseCampaignFeatures) return children;
 
@@ -61,7 +68,7 @@ export function ZeroBrowserGate({ children }: { children: ReactNode }) {
         <a className="zero-gate__action" href={ZERO_BROWSER_DOWNLOAD_URL}>
           <img
             className="zero-gate__browser-icon"
-            src="/assets/zero-browser-icon.svg"
+            src="assets/zero-browser-icon.svg"
             alt=""
             aria-hidden="true"
           />

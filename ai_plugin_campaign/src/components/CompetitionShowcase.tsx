@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import { schools, searchSchools } from '../data/schools';
 import {
+  getMockShowcasePage,
   getShowcasePageItems,
   useMockWhenShowcaseIsEmpty,
   AWARDS_PAGE_SIZE,
@@ -8,16 +9,18 @@ import {
 } from '../data/showcase';
 import { getAiProducts, type AiProductsPage } from '../services/aiProductsApi';
 
-const EMPTY_PRODUCT_LOGO = '/assets/figma/showcase/zero-logo.png';
+const EMPTY_PRODUCT_LOGO = 'assets/figma/showcase/zero-logo.png';
 
 export function CompetitionShowcase({
   awards = false,
   onInstall,
   initialData,
+  staticMode = false,
 }: {
   awards?: boolean;
   onInstall?: (id: string) => void;
   initialData?: AiProductsPage;
+  staticMode?: boolean;
 }) {
   const pageSize = awards ? AWARDS_PAGE_SIZE : SHOWCASE_PAGE_SIZE;
   const productKind = awards ? 4 : 2;
@@ -58,11 +61,6 @@ export function CompetitionShowcase({
   }
 
   useEffect(() => {
-    const controller = new AbortController();
-    let active = true;
-    setLoading(true);
-    setLoadError('');
-
     const query = {
       kind: productKind,
       page: currentPage,
@@ -70,6 +68,18 @@ export function CompetitionShowcase({
       school,
       key: keyword,
     } as const;
+
+    if (staticMode) {
+      setProductsPage(getMockShowcasePage(query));
+      setLoading(false);
+      setLoadError('');
+      return undefined;
+    }
+
+    const controller = new AbortController();
+    let active = true;
+    setLoading(true);
+    setLoadError('');
 
     getAiProducts(query, { signal: controller.signal })
       .then((result) => {
@@ -95,7 +105,7 @@ export function CompetitionShowcase({
       active = false;
       controller.abort();
     };
-  }, [currentPage, keyword, pageSize, productKind, reloadToken, school]);
+  }, [currentPage, keyword, pageSize, productKind, reloadToken, school, staticMode]);
 
   useEffect(() => {
     if (!schoolListOpen) return undefined;
@@ -183,7 +193,7 @@ export function CompetitionShowcase({
     >
       <a
         className="rules-dock competition-showcase__rules"
-        href="?stage=submission"
+        href={staticMode ? '#/?preview=rules' : '?stage=submission'}
         aria-label="查看活动规则"
       >
         <span>活动<br />规则</span>
@@ -213,13 +223,13 @@ export function CompetitionShowcase({
               onKeyDown={handleSchoolTriggerKeyDown}
             >
               <span>{school || '请筛选您想选择的学校'}</span>
-              <img src="/assets/figma/showcase/select-arrow.svg" alt="" />
+              <img src="assets/figma/showcase/select-arrow.svg" alt="" />
             </button>
             {schoolListOpen ? (
               <div className="showcase-school-select__dropdown">
                 <label className="showcase-school-select__search">
                   <span className="sr-only">搜索学校名称</span>
-                  <img src="/assets/figma/showcase/search-icon.svg" alt="" />
+                  <img src="assets/figma/showcase/search-icon.svg" alt="" />
                   <input
                     ref={schoolSearchRef}
                     value={schoolSearch}
@@ -262,7 +272,7 @@ export function CompetitionShowcase({
           </div>
           <label className="showcase-search-input">
             <span className="sr-only">搜索作品</span>
-            <img src="/assets/figma/showcase/search-icon.svg" alt="" />
+            <img src="assets/figma/showcase/search-icon.svg" alt="" />
             <input
               value={searchText}
               onChange={(event) => setSearchText(event.target.value)}
@@ -324,7 +334,7 @@ export function CompetitionShowcase({
               disabled={currentPage === 1}
               onClick={() => changePage(currentPage - 1)}
             >
-              <img src="/assets/figma/showcase/pagination-left.svg" alt="" />
+              <img src="assets/figma/showcase/pagination-left.svg" alt="" />
             </button>
             {pageItems.map((item) => typeof item === 'number' ? (
               <button
@@ -344,7 +354,7 @@ export function CompetitionShowcase({
               disabled={currentPage === totalPages}
               onClick={() => changePage(currentPage + 1)}
             >
-              <img src="/assets/figma/showcase/pagination-right.svg" alt="" />
+              <img src="assets/figma/showcase/pagination-right.svg" alt="" />
             </button>
           </nav>
         ) : null}

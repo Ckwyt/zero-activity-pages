@@ -36,7 +36,7 @@ export const pluginWorks: PluginWork[] = [
     description: '自动梳理课程重点，快速生成复习清单与学习计划。',
     author: 'ZERO',
     badge: '135',
-    image: '/assets/figma/showcase/raw-2.png',
+    image: 'assets/figma/showcase/raw-2.png',
   },
   {
     id: 'travel-guide',
@@ -44,7 +44,7 @@ export const pluginWorks: PluginWork[] = [
     description: '根据兴趣与时间，一键规划有温度的城市漫游路线。',
     author: 'ZERO',
     badge: '128',
-    image: '/assets/figma/showcase/raw-4.png',
+    image: 'assets/figma/showcase/raw-4.png',
   },
   {
     id: 'job-helper',
@@ -52,7 +52,7 @@ export const pluginWorks: PluginWork[] = [
     description: '分析岗位要求，针对性优化简历并模拟面试问答。',
     author: 'ZERO',
     badge: '116',
-    image: '/assets/figma/showcase/raw-5.png',
+    image: 'assets/figma/showcase/raw-5.png',
   },
   {
     id: 'design-master',
@@ -60,7 +60,7 @@ export const pluginWorks: PluginWork[] = [
     description: '将自然语言需求快速转化为结构清晰的设计草图。',
     author: 'ZERO',
     badge: '109',
-    image: '/assets/figma/showcase/raw-3.png',
+    image: 'assets/figma/showcase/raw-3.png',
   },
   {
     id: 'reading',
@@ -68,7 +68,7 @@ export const pluginWorks: PluginWork[] = [
     description: '提取长文核心观点，保留依据并支持上下文追问。',
     author: 'ZERO',
     badge: '98',
-    image: '/assets/figma/showcase/raw-1.png',
+    image: 'assets/figma/showcase/raw-1.png',
   },
   {
     id: 'club',
@@ -76,6 +76,6 @@ export const pluginWorks: PluginWork[] = [
     description: '从策划、物料到招募文案，完成活动全流程协作。',
     author: 'ZERO',
     badge: '92',
-    image: '/assets/figma/showcase/raw-11.png',
+    image: 'assets/figma/showcase/raw-11.png',
   },
 ];

@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig(({ mode }) => ({
   plugins: [react()],
-  base: mode === 'online' ? './' : undefined,
+  base: mode === 'online' || mode === 'github' ? './' : undefined,
   server: {
     port: 4175,
     proxy: {

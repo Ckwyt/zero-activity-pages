@@ -6,7 +6,7 @@ describe('CompetitionTrack presentation', () => {
   it('renders the Figma theme aura as an image layer', () => {
     const markup = renderToStaticMarkup(<CompetitionTrack onRules={() => undefined} />);
     expect(markup).toContain('class="competition-track__aura"');
-    expect(markup).toContain('src="/assets/figma/theme-aura.png"');
+    expect(markup).toContain('src="assets/figma/theme-aura.png"');
   });
 
   it('shows the rules action by default', () => {

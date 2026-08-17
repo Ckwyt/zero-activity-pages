@@ -104,7 +104,7 @@ export function LearningTrack({
             >去保存</GradientButton>
           </div>
           <div className="drive-preview-stage">
-            <img className="drive-preview" src="/assets/figma/drive-preview.png" alt="ZERO 网盘课程资源转存界面" />
+            <img className="drive-preview" src="assets/figma/drive-preview.png" alt="ZERO 网盘课程资源转存界面" />
           </div>
         </div>
       </section>

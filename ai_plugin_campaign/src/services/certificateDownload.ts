@@ -1,7 +1,7 @@
 const CERTIFICATE_WIDTH = 1754;
 const CERTIFICATE_HEIGHT = 1243;
-const CERTIFICATE_BACKGROUND = '/assets/figma/certificate-bg.png';
-const CERTIFICATE_DIVIDER = '/assets/figma/certificate-divider.png';
+const CERTIFICATE_BACKGROUND = 'assets/figma/certificate-bg.png';
+const CERTIFICATE_DIVIDER = 'assets/figma/certificate-divider.png';
 
 interface CertificateDownloadOptions {
   studentName: string;

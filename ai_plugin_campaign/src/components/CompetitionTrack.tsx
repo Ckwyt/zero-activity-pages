@@ -23,7 +23,7 @@ export function CompetitionTrack({
   return (
     <main className="competition-track">
       <div className="competition-track__aura" aria-hidden="true">
-        <img src="/assets/figma/theme-aura.png" alt="" />
+        <img src="assets/figma/theme-aura.png" alt="" />
       </div>
       {showRules ? (
         <button className="rules-dock" type="button" onClick={onRules}><span>活动<br />规则</span></button>
@@ -31,7 +31,7 @@ export function CompetitionTrack({
       <section className="theme-section section-shell competition-section">
         <img
           className="theme-heading"
-          src="/assets/figma/theme-heading.svg"
+          src="assets/figma/theme-heading.svg"
           alt="征集主题 THEME"
         />
         <article className="theme-card">
@@ -51,7 +51,7 @@ export function CompetitionTrack({
       <section className="schedule-section section-shell competition-section">
         <img
           className="schedule-heading"
-          src="/assets/figma/schedule-heading.svg"
+          src="assets/figma/schedule-heading.svg"
           alt="征集周期与遴选安排 CYCLE AND SCHEDULE"
         />
         <div className="schedule-board">
@@ -80,7 +80,7 @@ export function CompetitionTrack({
       <section className="award-section section-shell competition-section">
         <img
           className="award-heading"
-          src="/assets/figma/award-heading.svg"
+          src="assets/figma/award-heading.svg"
           alt="奖励设置 AWARD"
         />
         <div className="awards-grid">
