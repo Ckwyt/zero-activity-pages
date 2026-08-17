@@ -16,7 +16,7 @@ body { margin: 0; min-width: 320px; }
 button, input, select { font: inherit; }
 button { cursor: pointer; }
 button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid rgba(67,65,227,.28); outline-offset: 2px; }
-img { display: block; max-width: 100%; }
+img { display: block; max-width: 100%; height: auto; object-fit: contain; }
 p, h1, h2, h3, h4 { margin: 0; }
 
 .campaign-app { min-height: 100vh; overflow: clip; }
@@ -135,7 +135,7 @@ p, h1, h2, h3, h4 { margin: 0; }
   min-height: 468px;
   margin: 58px auto 0;
   padding: 101px 80px 48px;
-  background: url('/assets/figma/course-card.svg') center/100% 100% no-repeat;
+  background: url('/assets/figma/course-card.svg') center top/100% auto no-repeat;
   text-align: center;
 }
 .course-card h3 { color: transparent; font-size: 20px; background: linear-gradient(90deg,#4341e3 55%,#ab50f9); background-clip: text; }
@@ -162,7 +162,7 @@ p, h1, h2, h3, h4 { margin: 0; }
   position: relative;
   z-index: 1;
   width: min(856px,100%);
-  aspect-ratio: 856 / 463;
+  aspect-ratio: 1848 / 1000;
   margin-top: 31px;
 }
 .drive-preview-stage::before {
@@ -175,7 +175,7 @@ p, h1, h2, h3, h4 { margin: 0; }
   width: 125.9346%;
   height: 144.4924%;
   transform: translateX(-50%);
-  background: url('/assets/figma/drive-aura.png') center/100% 100% no-repeat;
+  background: url('/assets/figma/drive-aura.png') center/contain no-repeat;
   pointer-events: none;
 }
 .drive-preview {
@@ -183,8 +183,9 @@ p, h1, h2, h3, h4 { margin: 0; }
   z-index: 1;
   display: block;
   width: 100%;
-  height: 100%;
-  object-fit: fill;
+  height: auto;
+  aspect-ratio: 1848 / 1000;
+  object-fit: contain;
   border: 4px solid #ebf4ff;
   border-bottom: 0;
   border-radius: 24px 24px 0 0;
@@ -254,14 +255,14 @@ p, h1, h2, h3, h4 { margin: 0; }
   width: 658px;
   height: 436px;
   transform: translateX(-50%);
-  background: url('/assets/figma/theme-aura.png') center/100% 100% no-repeat;
+  background: url('/assets/figma/theme-aura.png') center/contain no-repeat;
   pointer-events: none;
 }
 .competition-section { width: min(1200px, calc(100% - 48px)); padding-top: 47px; }
 .theme-heading,.award-heading { width: min(298px,100%); height: auto; margin-inline: auto; }
 .schedule-heading { width: min(516px,100%); height: auto; margin-inline: auto; }
 .theme-section { position: relative; z-index: 1; min-height: 870px; background: none; }
-.theme-card { display: flex; align-items: center; flex-direction: column; width: min(922px,100%); min-height: 617px; margin: 24px auto 0; padding: 49px 96px 40px; background: url('/assets/figma/theme-card.svg') center/100% 100% no-repeat; text-align: center; }
+.theme-card { display: flex; align-items: center; flex-direction: column; width: min(922px,100%); min-height: 617px; margin: 24px auto 0; padding: 49px 96px 40px; background: url('/assets/figma/theme-card.svg') center top/100% auto no-repeat; text-align: center; }
 .theme-card p { width: min(615px,100%); color: #fff; font-size: 16px; font-weight: 500; line-height: 32px; }
 .theme-card strong, .theme-card h3 { color: #9523ff; }
 .theme-card h3 { margin-top: 0; font-size: 16px; font-weight: 500; line-height: 32px; }
@@ -346,7 +347,7 @@ p, h1, h2, h3, h4 { margin: 0; }
 .showcase-card { position: relative; width: 288px; height: 150px; overflow: hidden; border-radius: 8px; color: #333; background: #fff; }
 .showcase-card--awards { height: 207px; }
 .showcase-card__cover { position: absolute; top: 24px; left: 18px; width: 38px; height: 38px; overflow: hidden; border-radius: 3px; background: #e8ecf2; }
-.showcase-card__cover > img { width: 100%; height: 100%; object-fit: cover; }
+.showcase-card__cover > img { width: 100%; height: 100%; object-fit: contain; }
 .showcase-card__copy { position: absolute; inset: 0; pointer-events: none; }
 .showcase-card__copy h3 { position: absolute; top: 31px; left: 66px; width: 176px; overflow: hidden; font-size: 18px; font-weight: 500; line-height: 25px; text-overflow: ellipsis; white-space: nowrap; }
 .showcase-card__copy p { position: absolute; top: 79px; left: 16px; display: -webkit-box; width: 256px; overflow: hidden; color: #bebebe; font-size: 16px; line-height: 22px; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
@@ -369,6 +370,29 @@ p, h1, h2, h3, h4 { margin: 0; }
 @media (max-width: 1247px) {
   .competition-showcase__shell { width: min(100% - 48px,898px); }
   .showcase-grid { grid-template-columns: repeat(3,288px); justify-content: center; }
+}
+
+/*
+ * 2K / 4K 屏幕不再继续放大以 1440px 设计稿为基准的背景图。
+ * 图片保持原始宽高比居中，左右区域由各区块底色自然延展，避免超宽屏严重裁切和低清放大。
+ */
+@media (min-width: 1920px) {
+  .campaign-hero--learning {
+    background-image: url('/assets/figma/learning-hero.png'), linear-gradient(90deg,#dfffff,#fdfcfe);
+    background-size: auto 856px, 100% 100%;
+  }
+  .campaign-hero--competition {
+    background-image: url('/assets/figma/competition-hero.png'), linear-gradient(90deg,#0e1627,#0d1726);
+    background-size: auto 767px, 100% 100%;
+  }
+  .advanced-section__surface {
+    background-image: url('/assets/figma/advanced-bg.png'), linear-gradient(90deg,#e5e1fe,#f3fcfc);
+    background-size: auto 693px, 100% 100%;
+  }
+  .certificate-section::before {
+    background-image: url('/assets/figma/certificate-section-bg.png'), linear-gradient(90deg,#e2ecfe,#e6ddfd);
+    background-size: auto 447px, 100% 100%;
+  }
 }
 
 .modal-layer { position: fixed; z-index: 100; inset: 0; display: grid; place-items: center; padding: 24px; background: rgba(0,0,0,.7); backdrop-filter: blur(3px); }
@@ -516,6 +540,7 @@ p, h1, h2, h3, h4 { margin: 0; }
   .rules-dock { top: -420px; }
   .hero-copy { top: 123px; padding-inline: 24px; }.hero-copy h1 { font-size: 44px; }.hero-copy h1 span { font-size: 50px; }.hero-copy > p { font-size: 18px; }
   .course-card { padding: 88px 50px 44px; background-size: cover; border-radius: 24px; }
+  .theme-card { background-size: cover; }
   .schedule-board { height: auto; grid-template-columns: 1fr; }.timeline-panel { border-right: 0; border-bottom: 1px solid #7e7e7e; }.criteria-panel { padding-inline: 46px !important; }.criteria-panel > div { grid-template-columns: repeat(2,minmax(0,1fr)); margin-top: 35px; }.criteria-panel article { width: auto; }
   .competition-showcase__shell { width: min(100% - 32px,720px); }
   .showcase-filters { grid-template-columns: minmax(220px,1fr) minmax(220px,1fr) 106px; }
