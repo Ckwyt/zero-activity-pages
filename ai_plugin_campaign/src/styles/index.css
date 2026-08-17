@@ -245,7 +245,8 @@ p, h1, h2, h3, h4 { margin: 0; }
 .section-title--certificate .pill-button { margin-top: 24px; }
 
 .campaign-app--competition { background: #121b29; color: #fff; }
-.competition-track { position: relative; isolation: isolate; }
+.campaign-app--competition .campaign-hero { z-index: 0; }
+.competition-track { position: relative; z-index: 1; isolation: isolate; }
 .competition-track::before {
   content: "";
   position: absolute;
@@ -255,6 +256,7 @@ p, h1, h2, h3, h4 { margin: 0; }
   width: 658px;
   height: 436px;
   transform: translateX(-50%);
+  filter: blur(17px);
   background: url('/assets/figma/theme-aura.png') center/contain no-repeat;
   pointer-events: none;
 }
