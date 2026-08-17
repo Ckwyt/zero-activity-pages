@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
-import { schools } from '../data/activity';
+import { schools, searchSchools } from '../data/schools';
 import {
   getShowcasePageItems,
   useMockWhenShowcaseIsEmpty,
@@ -32,12 +32,18 @@ export function CompetitionShowcase({
   const [loadError, setLoadError] = useState('');
   const [reloadToken, setReloadToken] = useState(0);
   const [schoolListOpen, setSchoolListOpen] = useState(false);
+  const [schoolSearch, setSchoolSearch] = useState('');
   const [highlightedSchool, setHighlightedSchool] = useState(0);
   const sectionRef = useRef<HTMLElement>(null);
   const schoolSelectRef = useRef<HTMLDivElement>(null);
-  const schoolOptions = useMemo(
-    () => [{ value: '', label: '请筛选您想选择的学校' }, ...schools.map((item) => ({ value: item, label: item }))],
-    [],
+  const schoolSearchRef = useRef<HTMLInputElement>(null);
+  const schoolTriggerRef = useRef<HTMLButtonElement>(null);
+  const filteredSchoolOptions = useMemo(
+    () => [
+      ...(schoolSearch.trim() ? [] : [{ value: '', label: '请筛选您想选择的学校' }]),
+      ...searchSchools(schoolSearch).map((item) => ({ value: item, label: item })),
+    ],
+    [schoolSearch],
   );
 
   const totalPages = Math.ceil(productsPage.total / pageSize);
@@ -104,6 +110,11 @@ export function CompetitionShowcase({
 
   useEffect(() => {
     if (!schoolListOpen) return;
+    schoolSearchRef.current?.focus();
+  }, [schoolListOpen]);
+
+  useEffect(() => {
+    if (!schoolListOpen) return;
     schoolSelectRef.current
       ?.querySelector<HTMLElement>(`#showcase-school-option-${highlightedSchool}`)
       ?.scrollIntoView({ block: 'nearest' });
@@ -111,42 +122,48 @@ export function CompetitionShowcase({
 
   function selectSchool(nextSchool: string) {
     setSchool(nextSchool);
+    setSchoolSearch('');
     setCurrentPage(1);
     setSchoolListOpen(false);
   }
 
-  function handleSchoolKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
-    const selectedIndex = Math.max(0, schoolOptions.findIndex((item) => item.value === school));
+  function openSchoolList() {
+    setSchoolSearch('');
+    setHighlightedSchool(Math.max(0, schools.indexOf(school) + 1));
+    setSchoolListOpen(true);
+  }
 
+  function handleSchoolTriggerKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault();
-      if (!schoolListOpen) {
-        setHighlightedSchool(selectedIndex);
-        setSchoolListOpen(true);
-        return;
-      }
+      if (!schoolListOpen) openSchoolList();
+      else schoolSearchRef.current?.focus();
+    }
+    if (event.key === 'Escape' && schoolListOpen) {
+      event.preventDefault();
+      setSchoolListOpen(false);
+    }
+  }
+
+  function handleSchoolSearchKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      if (!filteredSchoolOptions.length) return;
       const offset = event.key === 'ArrowDown' ? 1 : -1;
-      setHighlightedSchool((current) => (current + offset + schoolOptions.length) % schoolOptions.length);
+      setHighlightedSchool((current) => (
+        current + offset + filteredSchoolOptions.length
+      ) % filteredSchoolOptions.length);
       return;
     }
-    if (schoolListOpen && (event.key === 'Enter' || event.key === ' ')) {
+    if (event.key === 'Enter' && filteredSchoolOptions[highlightedSchool]) {
       event.preventDefault();
-      selectSchool(schoolOptions[highlightedSchool].value);
-      return;
-    }
-    if (schoolListOpen && event.key === 'Home') {
-      event.preventDefault();
-      setHighlightedSchool(0);
-      return;
-    }
-    if (schoolListOpen && event.key === 'End') {
-      event.preventDefault();
-      setHighlightedSchool(schoolOptions.length - 1);
+      selectSchool(filteredSchoolOptions[highlightedSchool].value);
       return;
     }
     if (event.key === 'Escape') {
       event.preventDefault();
       setSchoolListOpen(false);
+      schoolTriggerRef.current?.focus();
     }
   }
 
@@ -178,6 +195,7 @@ export function CompetitionShowcase({
           <div className="showcase-school-select" ref={schoolSelectRef}>
             <span className="sr-only" id="showcase-school-select-label">按学校筛选</span>
             <button
+              ref={schoolTriggerRef}
               className={`showcase-school-select__trigger ${school ? '' : 'is-placeholder'}`}
               type="button"
               role="combobox"
@@ -185,38 +203,61 @@ export function CompetitionShowcase({
               aria-controls="showcase-school-options"
               aria-expanded={schoolListOpen}
               aria-haspopup="listbox"
-              aria-activedescendant={schoolListOpen ? `showcase-school-option-${highlightedSchool}` : undefined}
+              aria-activedescendant={schoolListOpen && filteredSchoolOptions.length
+                ? `showcase-school-option-${highlightedSchool}`
+                : undefined}
               onClick={() => {
-                setHighlightedSchool(Math.max(0, schoolOptions.findIndex((item) => item.value === school)));
-                setSchoolListOpen((current) => !current);
+                if (schoolListOpen) setSchoolListOpen(false);
+                else openSchoolList();
               }}
-              onKeyDown={handleSchoolKeyDown}
+              onKeyDown={handleSchoolTriggerKeyDown}
             >
               <span>{school || '请筛选您想选择的学校'}</span>
               <img src="/assets/figma/showcase/select-arrow.svg" alt="" />
             </button>
             {schoolListOpen ? (
-              <ul
-                className="showcase-school-select__options"
-                id="showcase-school-options"
-                role="listbox"
-                aria-labelledby="showcase-school-select-label"
-              >
-                {schoolOptions.map((item, index) => (
-                  <li
-                    className={index === highlightedSchool ? 'is-highlighted' : ''}
-                    id={`showcase-school-option-${index}`}
-                    role="option"
-                    aria-selected={school === item.value}
-                    key={item.value || 'all-schools'}
-                    onClick={() => selectSchool(item.value)}
-                    onPointerMove={() => setHighlightedSchool(index)}
-                  >
-                    <span>{item.label}</span>
-                    {school === item.value ? <span className="showcase-school-select__check" aria-hidden="true">✓</span> : null}
-                  </li>
-                ))}
-              </ul>
+              <div className="showcase-school-select__dropdown">
+                <label className="showcase-school-select__search">
+                  <span className="sr-only">搜索学校名称</span>
+                  <img src="/assets/figma/showcase/search-icon.svg" alt="" />
+                  <input
+                    ref={schoolSearchRef}
+                    value={schoolSearch}
+                    type="search"
+                    placeholder="搜索学校名称"
+                    autoComplete="off"
+                    onChange={(event) => {
+                      setSchoolSearch(event.target.value);
+                      setHighlightedSchool(0);
+                    }}
+                    onKeyDown={handleSchoolSearchKeyDown}
+                  />
+                </label>
+                <ul
+                  className="showcase-school-select__options"
+                  id="showcase-school-options"
+                  role="listbox"
+                  aria-labelledby="showcase-school-select-label"
+                >
+                  {filteredSchoolOptions.map((item, index) => (
+                    <li
+                      className={index === highlightedSchool ? 'is-highlighted' : ''}
+                      id={`showcase-school-option-${index}`}
+                      role="option"
+                      aria-selected={school === item.value}
+                      key={item.value || 'all-schools'}
+                      onClick={() => selectSchool(item.value)}
+                      onPointerMove={() => setHighlightedSchool(index)}
+                    >
+                      <span>{item.label}</span>
+                      {school === item.value ? <span className="showcase-school-select__check" aria-hidden="true">✓</span> : null}
+                    </li>
+                  ))}
+                  {!filteredSchoolOptions.length ? (
+                    <li className="showcase-school-select__empty" role="presentation">未找到匹配的学校</li>
+                  ) : null}
+                </ul>
+              </div>
             ) : null}
           </div>
           <label className="showcase-search-input">

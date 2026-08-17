@@ -1,18 +1,5 @@
 import type { PluginWork } from '../types';
 
-export const schools = [
-  '北京大学',
-  '清华大学',
-  '中国人民大学',
-  '北京师范大学',
-  '中国传媒大学',
-  '浙江大学',
-  '复旦大学',
-  '上海交通大学',
-  '同济大学',
-  '其他院校',
-];
-
 export const activityLinks = {
   course: import.meta.env.VITE_COURSE_URL
     || 'https://www.bilibili.com/video/BV1QruC6iEWA/?spm_id_from=333.1007.tianma.1-1-1.click&assistant_action=course_submit',

@@ -1,5 +1,6 @@
 import type { AiProduct, AiProductsPage, AiProductsQuery } from '../services/aiProductsApi';
-import { pluginWorks, schools } from './activity';
+import { pluginWorks } from './activity';
+import { schools } from './schools';
 
 export type ShowcasePageItem = number | 'ellipsis-start' | 'ellipsis-end';
 

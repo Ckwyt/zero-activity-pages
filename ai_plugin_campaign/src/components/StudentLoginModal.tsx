@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
-import { schools } from '../data/activity';
+import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
+import { schools, searchSchools } from '../data/schools';
 import type { StudentLoginPayload } from '../types';
 
 export function StudentLoginModal({
@@ -12,9 +12,13 @@ export function StudentLoginModal({
   const [values, setValues] = useState({ school: '', name: '', studentNumber: '' });
   const [errors, setErrors] = useState<Partial<Record<keyof typeof values | 'duplicate', string>>>({});
   const [schoolListOpen, setSchoolListOpen] = useState(false);
+  const [schoolSearch, setSchoolSearch] = useState('');
   const [highlightedSchool, setHighlightedSchool] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const schoolSelectRef = useRef<HTMLDivElement>(null);
+  const schoolSearchRef = useRef<HTMLInputElement>(null);
+  const schoolTriggerRef = useRef<HTMLButtonElement>(null);
+  const filteredSchools = useMemo(() => searchSchools(schoolSearch), [schoolSearch]);
 
   useEffect(() => {
     if (!schoolListOpen) return undefined;
@@ -27,44 +31,62 @@ export function StudentLoginModal({
     return () => document.removeEventListener('pointerdown', closeWhenClickingOutside);
   }, [schoolListOpen]);
 
+  useEffect(() => {
+    if (!schoolListOpen) return;
+    schoolSearchRef.current?.focus();
+  }, [schoolListOpen]);
+
+  useEffect(() => {
+    if (!schoolListOpen) return;
+    schoolSelectRef.current
+      ?.querySelector<HTMLElement>(`#school-option-${highlightedSchool}`)
+      ?.scrollIntoView({ block: 'nearest' });
+  }, [highlightedSchool, schoolListOpen]);
+
   function selectSchool(school: string) {
     setValues((current) => ({ ...current, school }));
     setErrors((current) => ({ ...current, school: undefined }));
+    setSchoolSearch('');
     setSchoolListOpen(false);
   }
 
-  function handleSchoolKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
-    const selectedIndex = Math.max(0, schools.indexOf(values.school));
+  function openSchoolList() {
+    setSchoolSearch('');
+    setHighlightedSchool(Math.max(0, schools.indexOf(values.school)));
+    setSchoolListOpen(true);
+  }
 
+  function handleSchoolTriggerKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault();
-      if (!schoolListOpen) {
-        setHighlightedSchool(selectedIndex);
-        setSchoolListOpen(true);
-        return;
-      }
+      if (!schoolListOpen) openSchoolList();
+      else schoolSearchRef.current?.focus();
+    }
+    if (event.key === 'Escape' && schoolListOpen) {
+      event.preventDefault();
+      setSchoolListOpen(false);
+    }
+  }
+
+  function handleSchoolSearchKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      if (!filteredSchools.length) return;
       const offset = event.key === 'ArrowDown' ? 1 : -1;
-      setHighlightedSchool((current) => (current + offset + schools.length) % schools.length);
+      setHighlightedSchool((current) => (
+        current + offset + filteredSchools.length
+      ) % filteredSchools.length);
       return;
     }
-    if (schoolListOpen && (event.key === 'Enter' || event.key === ' ')) {
+    if (event.key === 'Enter' && filteredSchools[highlightedSchool]) {
       event.preventDefault();
-      selectSchool(schools[highlightedSchool]);
-      return;
-    }
-    if (schoolListOpen && event.key === 'Home') {
-      event.preventDefault();
-      setHighlightedSchool(0);
-      return;
-    }
-    if (schoolListOpen && event.key === 'End') {
-      event.preventDefault();
-      setHighlightedSchool(schools.length - 1);
+      selectSchool(filteredSchools[highlightedSchool]);
       return;
     }
     if (event.key === 'Escape') {
       event.preventDefault();
       setSchoolListOpen(false);
+      schoolTriggerRef.current?.focus();
     }
   }
 
@@ -94,6 +116,7 @@ export function StudentLoginModal({
           <span id="school-select-label">学校 <em>*</em></span>
           <div className="school-select" ref={schoolSelectRef}>
             <button
+              ref={schoolTriggerRef}
               className={`school-select__trigger ${values.school ? '' : 'is-placeholder'}`}
               type="button"
               role="combobox"
@@ -101,13 +124,15 @@ export function StudentLoginModal({
               aria-controls="school-options"
               aria-expanded={schoolListOpen}
               aria-haspopup="listbox"
-              aria-activedescendant={schoolListOpen ? `school-option-${highlightedSchool}` : undefined}
+              aria-activedescendant={schoolListOpen && filteredSchools.length
+                ? `school-option-${highlightedSchool}`
+                : undefined}
               aria-invalid={Boolean(errors.school)}
               onClick={() => {
-                setHighlightedSchool(Math.max(0, schools.indexOf(values.school)));
-                setSchoolListOpen((current) => !current);
+                if (schoolListOpen) setSchoolListOpen(false);
+                else openSchoolList();
               }}
-              onKeyDown={handleSchoolKeyDown}
+              onKeyDown={handleSchoolTriggerKeyDown}
             >
               <span>{values.school || '请选择您的学校'}</span>
               <svg aria-hidden="true" viewBox="0 0 16 16">
@@ -115,22 +140,46 @@ export function StudentLoginModal({
               </svg>
             </button>
             {schoolListOpen ? (
-              <ul className="school-select__options" id="school-options" role="listbox" aria-labelledby="school-select-label">
-                {schools.map((school, index) => (
-                  <li
-                    className={index === highlightedSchool ? 'is-highlighted' : ''}
-                    id={`school-option-${index}`}
-                    role="option"
-                    aria-selected={values.school === school}
-                    key={school}
-                    onClick={() => selectSchool(school)}
-                    onPointerMove={() => setHighlightedSchool(index)}
-                  >
-                    <span>{school}</span>
-                    {values.school === school ? <span className="school-select__check" aria-hidden="true">✓</span> : null}
-                  </li>
-                ))}
-              </ul>
+              <div className="school-select__dropdown">
+                <label className="school-select__search">
+                  <span className="sr-only">搜索学校名称</span>
+                  <svg aria-hidden="true" viewBox="0 0 16 16">
+                    <circle cx="7" cy="7" r="4.5" />
+                    <path d="m10.5 10.5 3 3" />
+                  </svg>
+                  <input
+                    ref={schoolSearchRef}
+                    value={schoolSearch}
+                    type="search"
+                    placeholder="搜索学校名称"
+                    autoComplete="off"
+                    onChange={(event) => {
+                      setSchoolSearch(event.target.value);
+                      setHighlightedSchool(0);
+                    }}
+                    onKeyDown={handleSchoolSearchKeyDown}
+                  />
+                </label>
+                <ul className="school-select__options" id="school-options" role="listbox" aria-labelledby="school-select-label">
+                  {filteredSchools.map((school, index) => (
+                    <li
+                      className={index === highlightedSchool ? 'is-highlighted' : ''}
+                      id={`school-option-${index}`}
+                      role="option"
+                      aria-selected={values.school === school}
+                      key={school}
+                      onClick={() => selectSchool(school)}
+                      onPointerMove={() => setHighlightedSchool(index)}
+                    >
+                      <span>{school}</span>
+                      {values.school === school ? <span className="school-select__check" aria-hidden="true">✓</span> : null}
+                    </li>
+                  ))}
+                  {!filteredSchools.length ? (
+                    <li className="school-select__empty" role="presentation">未找到匹配的学校</li>
+                  ) : null}
+                </ul>
+              </div>
             ) : null}
           </div>
           {errors.school ? <small>{errors.school}</small> : null}
