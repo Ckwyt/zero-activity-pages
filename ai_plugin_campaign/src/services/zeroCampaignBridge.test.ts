@@ -1,11 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const browserSdk = vi.hoisted(() => ({
-  externalGetMID: vi.fn(() => ''),
-}));
-
-vi.mock('@q/browser-jssdk', () => browserSdk);
-
 import {
   getChannelId,
   getDeviceId,
@@ -15,10 +9,17 @@ import {
 } from './zeroCampaignBridge';
 
 describe('ZERO device identity', () => {
-  it('reads MID with the browser-jssdk method used by newpages', () => {
-    browserSdk.externalGetMID.mockReturnValue(' 0123456789abcdef0123456789abcdef ');
+  it('reads MID with the ZERO native bridge used by newpages', () => {
+    const getSid = vi.fn(() => 'test-sid');
+    const getMid = vi.fn(() => ' 0123456789abcdef0123456789abcdef ');
+    Object.defineProperty(window, 'external', {
+      configurable: true,
+      value: { GetSID: getSid, GetMID: getMid },
+    });
+
     expect(getDeviceId()).toBe('0123456789abcdef0123456789abcdef');
-    expect(browserSdk.externalGetMID).toHaveBeenCalledOnce();
+    expect(getSid).toHaveBeenCalledWith(window);
+    expect(getMid).toHaveBeenCalledWith('test-sid');
   });
 
   it('returns an empty MID when the SDK bridge is unavailable', () => {

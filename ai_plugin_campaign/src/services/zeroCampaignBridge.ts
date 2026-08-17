@@ -1,7 +1,6 @@
-import { externalGetMID } from '@q/browser-jssdk';
-
 interface ZeroExternalBridge {
   GetSID(hostWindow: Window): string;
+  GetMID(sid: string): string;
   AppCmd(
     sid: string,
     module: string,
@@ -32,6 +31,14 @@ function getZeroAccountApi() {
   return (globalThis as typeof globalThis & {
     chrome?: { account360?: ZeroAccountApi };
   }).chrome?.account360;
+}
+
+/** 与 browser-jssdk 的 externalGetMID 等价，但不依赖公司内网 npm 包。 */
+function readExternalMid() {
+  const bridge = getBridge();
+  if (typeof bridge?.GetSID !== 'function' || typeof bridge.GetMID !== 'function') return '';
+  const sid = bridge.GetSID(window);
+  return bridge.GetMID(sid);
 }
 
 /**
@@ -78,9 +85,9 @@ export function getZeroAccountLoginStatus(
 }
 
 /**
- * 与 newpages/src/utils/external.ts 保持一致，直接通过 browser-jssdk 同步读取 MID。
+ * 与 newpages/src/utils/external.ts 保持一致，通过 ZERO 原生桥同步读取 MID。
  */
-export function getDeviceId(readMid: () => string = externalGetMID) {
+export function getDeviceId(readMid: () => string = readExternalMid) {
   let mid = '';
   try {
     mid = readMid() || '';
