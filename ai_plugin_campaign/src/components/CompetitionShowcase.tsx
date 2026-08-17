@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
 import { schools } from '../data/activity';
 import {
   getShowcasePageItems,
+  useMockWhenShowcaseIsEmpty,
   AWARDS_PAGE_SIZE,
   SHOWCASE_PAGE_SIZE,
 } from '../data/showcase';
@@ -56,21 +57,24 @@ export function CompetitionShowcase({
     setLoading(true);
     setLoadError('');
 
-    getAiProducts({
+    const query = {
       kind: productKind,
       page: currentPage,
       size: pageSize,
       school,
       key: keyword,
-    }, { signal: controller.signal })
+    } as const;
+
+    getAiProducts(query, { signal: controller.signal })
       .then((result) => {
         if (!active) return;
-        const responseTotalPages = Math.ceil(result.total / pageSize);
+        const productsResult = useMockWhenShowcaseIsEmpty(result, query);
+        const responseTotalPages = Math.ceil(productsResult.total / pageSize);
         if (responseTotalPages > 0 && currentPage > responseTotalPages) {
           setCurrentPage(responseTotalPages);
           return;
         }
-        setProductsPage(result);
+        setProductsPage(productsResult);
       })
       .catch((error) => {
         if (!active || controller.signal.aborted) return;
