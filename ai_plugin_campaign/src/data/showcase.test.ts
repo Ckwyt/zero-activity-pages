@@ -5,6 +5,7 @@ import {
   mockShowcaseProducts,
   useMockWhenShowcaseIsEmpty,
   AWARDS_PAGE_SIZE,
+  MOCK_SHOWCASE_PRODUCT_COUNT,
   SHOWCASE_PAGE_SIZE,
 } from './showcase';
 
@@ -26,9 +27,26 @@ describe('showcase pagination presentation', () => {
       { kind: 2, page: 1, size: SHOWCASE_PAGE_SIZE },
     );
 
-    expect(fallback.list).toHaveLength(mockShowcaseProducts.length);
-    expect(fallback.total).toBe(mockShowcaseProducts.length);
+    expect(mockShowcaseProducts).toHaveLength(MOCK_SHOWCASE_PRODUCT_COUNT);
+    expect(fallback.list).toHaveLength(SHOWCASE_PAGE_SIZE);
+    expect(fallback.total).toBe(MOCK_SHOWCASE_PRODUCT_COUNT);
     expect(fallback.list.every((product) => product.status === 2)).toBe(true);
+  });
+
+  it('returns different mock works on each page', () => {
+    const firstPage = getMockShowcasePage({ kind: 2, page: 1, size: SHOWCASE_PAGE_SIZE });
+    const secondPage = getMockShowcasePage({ kind: 2, page: 2, size: SHOWCASE_PAGE_SIZE });
+    const thirdPage = getMockShowcasePage({ kind: 2, page: 3, size: SHOWCASE_PAGE_SIZE });
+
+    expect(firstPage.list).toHaveLength(20);
+    expect(secondPage.list).toHaveLength(20);
+    expect(thirdPage.list).toHaveLength(8);
+    expect(new Set([
+      ...firstPage.list,
+      ...secondPage.list,
+      ...thirdPage.list,
+    ].map((product) => product.id)).size).toBe(MOCK_SHOWCASE_PRODUCT_COUNT);
+    expect(firstPage.list[0].title).not.toBe(secondPage.list[0].title);
   });
 
   it('keeps school and keyword filters when showing mock works', () => {

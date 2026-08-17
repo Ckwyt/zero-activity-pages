@@ -7,24 +7,32 @@ export const SHOWCASE_PAGE_SIZE = 20;
 export const AWARDS_PAGE_SIZE = 16;
 
 const mockAuthors = ['林同学', '陈同学', '许同学', '周同学', '吴同学', '郑同学'];
+export const MOCK_SHOWCASE_PRODUCT_COUNT = 48;
 
-export const mockShowcaseProducts: AiProduct[] = pluginWorks.map((work, index) => ({
-  id: 900_001 + index,
-  qid: 0,
-  sessionId: `showcase-mock-${work.id}`,
-  fileId: 800_001 + index,
-  school: schools[index % (schools.length - 1)],
-  user_name: mockAuthors[index % mockAuthors.length],
-  uid: `showcase-mock-${work.id}`,
-  title: work.title,
-  logo: work.image,
-  content: work.description,
-  hash: String(index + 1).padStart(40, '0'),
-  status: 2,
-  ver: 1,
-  createdAt: 1_786_579_200 + index,
-  updatedAt: 1_786_665_600 + index,
-}));
+export const mockShowcaseProducts: AiProduct[] = Array.from(
+  { length: MOCK_SHOWCASE_PRODUCT_COUNT },
+  (_, index) => {
+    const work = pluginWorks[index % pluginWorks.length];
+    const sequence = String(index + 1).padStart(2, '0');
+    return {
+      id: 900_001 + index,
+      qid: 0,
+      sessionId: `showcase-mock-${sequence}`,
+      fileId: 800_001 + index,
+      school: schools[index % schools.length],
+      user_name: `${mockAuthors[index % mockAuthors.length]} ${sequence}`,
+      uid: `showcase-mock-${sequence}`,
+      title: `${work.title} ${sequence}`,
+      logo: work.image,
+      content: `${work.description}模拟作品编号 ${sequence}。`,
+      hash: String(index + 1).padStart(40, '0'),
+      status: 2,
+      ver: 1,
+      createdAt: 1_786_579_200 + index,
+      updatedAt: 1_786_665_600 + index,
+    };
+  },
+);
 
 export function getMockShowcasePage(query: AiProductsQuery): AiProductsPage {
   const page = query.page ?? 1;
