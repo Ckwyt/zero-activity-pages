@@ -374,21 +374,30 @@ p, h1, h2, h3, h4 { margin: 0; }
 }
 
 /*
- * 2K / 4K 屏幕下限制学习赛道和内容区装饰背景继续放大。
- * 赛事 Hero 保持 cover 整个画布，避免固定宽度图片在两侧产生接缝。
+ * 2K / 4K 屏幕下保持学习赛道中央背景的设计尺寸和宽高比，
+ * 1920px 以上多出的左右区域使用纯白背景。赛事 Hero 仍保持 cover。
  */
 @media (min-width: 1920px) {
   .campaign-hero--learning {
-    background-image: url('/assets/figma/learning-hero.png'), linear-gradient(90deg,#dfffff,#fdfcfe);
-    background-size: auto 856px, 100% 100%;
+    background-color: #fff;
+    background-image: url('/assets/figma/learning-hero.png');
+    background-size: auto 856px;
   }
   .advanced-section__surface {
-    background-image: url('/assets/figma/advanced-bg.png'), linear-gradient(90deg,#e5e1fe,#f3fcfc);
-    background-size: auto 693px, 100% 100%;
+    background-color: #fff;
+    background-image: url('/assets/figma/advanced-bg.png');
+    background-size: auto 693px;
+  }
+  .certificate-section {
+    background-color: #fff;
+    background-image: linear-gradient(90deg,#012dbd,#913df4);
+    background-position: center;
+    background-size: 1440px 100%;
+    background-repeat: no-repeat;
   }
   .certificate-section::before {
-    background-image: url('/assets/figma/certificate-section-bg.png'), linear-gradient(90deg,#e2ecfe,#e6ddfd);
-    background-size: auto 447px, 100% 100%;
+    background-image: url('/assets/figma/certificate-section-bg.png');
+    background-size: auto 447px;
   }
 }
 

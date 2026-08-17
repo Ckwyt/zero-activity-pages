@@ -263,7 +263,6 @@ export function CampaignPage() {
 
   function installWork(id: string) {
     dispatchZeroCampaignAction('plugin-install', { pluginId: id });
-    setNotice('已向 ZERO 浏览器发起插件安装请求');
   }
 
   function generateCertificate() {
