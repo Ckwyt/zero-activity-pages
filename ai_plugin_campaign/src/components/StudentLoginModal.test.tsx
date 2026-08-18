@@ -8,7 +8,7 @@ describe('StudentLoginModal school search', () => {
   let root: ReturnType<typeof createRoot>;
 
   beforeEach(() => {
-    globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+    Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
     HTMLElement.prototype.scrollIntoView = vi.fn();
     container = document.createElement('div');
     document.body.appendChild(container);
