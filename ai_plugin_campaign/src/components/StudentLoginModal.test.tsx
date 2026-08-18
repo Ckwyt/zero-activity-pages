@@ -32,6 +32,7 @@ describe('StudentLoginModal school search', () => {
     act(() => schoolInput?.focus());
     expect(container.querySelector('[role="listbox"]')).not.toBeNull();
     expect(schoolInput?.placeholder).toBe('搜索学校名称');
+    expect(schoolInput?.classList.contains('school-select__trigger')).toBe(true);
     expect(container.querySelectorAll('.school-select input[type="search"]')).toHaveLength(1);
     expect(container.querySelector('.school-select__dropdown input')).toBeNull();
 

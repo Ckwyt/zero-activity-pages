@@ -100,54 +100,55 @@ export function StudentLoginModal({
         <h2 id="student-login-title">活动登录</h2>
         <div className="login-modal__field">
           <span id="school-select-label">学校 <em>*</em></span>
-          <div className="school-select" ref={schoolSelectRef}>
-            <div className={`school-select__trigger ${values.school ? '' : 'is-placeholder'} ${schoolListOpen ? 'is-open' : ''}`}>
-              <input
-                ref={schoolSearchRef}
-                className="school-select__input"
-                value={schoolListOpen ? schoolSearch : values.school}
-                type="search"
-                role="combobox"
-                aria-labelledby="school-select-label"
-                aria-controls="school-options"
-                aria-expanded={schoolListOpen}
-                aria-haspopup="listbox"
-                aria-autocomplete="list"
-                aria-activedescendant={schoolListOpen && filteredSchools.length
-                  ? `school-option-${highlightedSchool}`
-                  : undefined}
-                aria-invalid={Boolean(errors.school)}
-                autoComplete="off"
-                placeholder={schoolListOpen ? '搜索学校名称' : '请选择您的学校'}
-                onFocus={() => {
-                  if (!schoolListOpen) openSchoolList();
-                }}
-                onChange={(event) => {
-                  if (!schoolListOpen) setSchoolListOpen(true);
-                  setSchoolSearch(event.target.value);
-                  setHighlightedSchool(0);
-                }}
-                onKeyDown={handleSchoolSearchKeyDown}
-              />
-              <button
-                className="school-select__toggle"
-                type="button"
-                aria-label={schoolListOpen ? '收起学校列表' : '展开学校列表并搜索'}
-                tabIndex={-1}
-                onPointerDown={(event) => event.preventDefault()}
-                onClick={() => {
-                  if (schoolListOpen) setSchoolListOpen(false);
-                  else {
-                    openSchoolList();
-                    schoolSearchRef.current?.focus();
-                  }
-                }}
-              >
-                <svg aria-hidden="true" viewBox="0 0 16 16">
-                  <path d="m4 6 4 4 4-4" />
-                </svg>
-              </button>
-            </div>
+          <div className={`school-select ${schoolListOpen ? 'is-open' : ''}`} ref={schoolSelectRef}>
+            <input
+              ref={schoolSearchRef}
+              className="school-select__trigger school-select__input"
+              value={schoolListOpen ? schoolSearch : values.school}
+              type="search"
+              role="combobox"
+              aria-labelledby="school-select-label"
+              aria-controls="school-options"
+              aria-expanded={schoolListOpen}
+              aria-haspopup="listbox"
+              aria-autocomplete="list"
+              aria-activedescendant={schoolListOpen && filteredSchools.length
+                ? `school-option-${highlightedSchool}`
+                : undefined}
+              aria-invalid={Boolean(errors.school)}
+              autoComplete="off"
+              placeholder={schoolListOpen ? '搜索学校名称' : '请选择您的学校'}
+              onFocus={() => {
+                if (!schoolListOpen) openSchoolList();
+              }}
+              onClick={() => {
+                if (!schoolListOpen) openSchoolList();
+              }}
+              onChange={(event) => {
+                if (!schoolListOpen) setSchoolListOpen(true);
+                setSchoolSearch(event.target.value);
+                setHighlightedSchool(0);
+              }}
+              onKeyDown={handleSchoolSearchKeyDown}
+            />
+            <button
+              className="school-select__toggle"
+              type="button"
+              aria-label={schoolListOpen ? '收起学校列表' : '展开学校列表并搜索'}
+              tabIndex={-1}
+              onPointerDown={(event) => event.preventDefault()}
+              onClick={() => {
+                if (schoolListOpen) setSchoolListOpen(false);
+                else {
+                  openSchoolList();
+                  schoolSearchRef.current?.focus();
+                }
+              }}
+            >
+              <svg aria-hidden="true" viewBox="0 0 16 16">
+                <path d="m4 6 4 4 4-4" />
+              </svg>
+            </button>
             {schoolListOpen ? (
               <div className="school-select__dropdown">
                 <ul className="school-select__options" id="school-options" role="listbox" aria-labelledby="school-select-label">
