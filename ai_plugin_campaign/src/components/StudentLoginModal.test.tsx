@@ -27,10 +27,13 @@ describe('StudentLoginModal school search', () => {
 
     const schoolInput = container.querySelector<HTMLInputElement>('input[role="combobox"]');
     expect(schoolInput).not.toBeNull();
-    expect(schoolInput?.placeholder).toBe('请选择或搜索您的学校');
+    expect(schoolInput?.placeholder).toBe('请选择您的学校');
 
     act(() => schoolInput?.focus());
     expect(container.querySelector('[role="listbox"]')).not.toBeNull();
+    expect(schoolInput?.placeholder).toBe('搜索学校名称');
+    expect(container.querySelectorAll('.school-select input[type="search"]')).toHaveLength(1);
+    expect(container.querySelector('.school-select__dropdown input')).toBeNull();
 
     act(() => {
       if (!schoolInput) return;

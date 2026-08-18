@@ -118,7 +118,7 @@ export function StudentLoginModal({
                   : undefined}
                 aria-invalid={Boolean(errors.school)}
                 autoComplete="off"
-                placeholder="请选择或搜索您的学校"
+                placeholder={schoolListOpen ? '搜索学校名称' : '请选择您的学校'}
                 onFocus={() => {
                   if (!schoolListOpen) openSchoolList();
                 }}
