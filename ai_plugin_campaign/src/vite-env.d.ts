@@ -7,6 +7,7 @@ interface ImportMetaEnv {
   readonly VITE_AI_EDU_API_MODE?: 'mock' | 'production';
   readonly VITE_AI_EDU_ADD_URL?: string;
   readonly VITE_AI_EDU_HAS_BIND_URL?: string;
+  readonly VITE_AI_EDU_DONE_URL?: string;
   readonly VITE_BOUND_STUDENT_NAME_URL?: string;
   readonly VITE_AI_PRODUCTS_URL?: string;
   readonly VITE_COURSE_URL?: string;

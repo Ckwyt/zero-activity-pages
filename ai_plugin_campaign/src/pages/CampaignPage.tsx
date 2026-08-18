@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { CampaignHeader } from '../components/CampaignHeader';
 import { CertificateModal } from '../components/CertificateModal';
 import { CompetitionTrack } from '../components/CompetitionTrack';
@@ -14,6 +14,7 @@ import {
   getAiEduBinding,
   type AiEduBindingData,
 } from '../services/aiEduBindingApi';
+import { completeAiEduTask } from '../services/aiEduTaskApi';
 import {
   markProgress,
   readCampaignSession,
@@ -119,6 +120,7 @@ export function CampaignPage() {
     () => getStaticPreviewSession(staticPreview).profile?.name ?? '',
   );
   const [certificateNameLoading, setCertificateNameLoading] = useState(false);
+  const certificateClaimReported = useRef(false);
   const [showSubmissionEnded, setShowSubmissionEnded] = useState(
     staticPreview === 'submission-ended',
   );
@@ -350,6 +352,21 @@ export function CampaignPage() {
     dispatchZeroCampaignAction('certificate-generated');
   }
 
+  function reportCertificateClaim() {
+    if (isStaticPreview || certificateClaimReported.current) return;
+    const profile = session.profile;
+    if (!profile || !deviceId) return;
+    certificateClaimReported.current = true;
+    void completeAiEduTask({
+      school: profile.school,
+      studentNumber: profile.studentNumber,
+      name: profile.name,
+      deviceId,
+    }, 'certificate_claim').catch((error) => {
+      console.error('[AI EDU Task] 证书领取任务上报失败：', error);
+    });
+  }
+
   async function openCertificate() {
     if (certificateNameLoading) return;
     const localStudentName = session.profile?.name;
@@ -364,6 +381,7 @@ export function CampaignPage() {
       return;
     }
 
+    certificateClaimReported.current = false;
     setCertificateNameLoading(true);
     try {
       const studentName = await resolveCertificateStudentName(localStudentName);
@@ -425,6 +443,7 @@ export function CampaignPage() {
           studentName={certificateStudentName || session.profile.name}
           onClose={() => setShowCertificate(false)}
           onGenerated={generateCertificate}
+          onOpened={reportCertificateClaim}
         />
       ) : null}
       {notice ? <button className="toast" type="button" onClick={() => setNotice('')}>{notice}<span>×</span></button> : null}

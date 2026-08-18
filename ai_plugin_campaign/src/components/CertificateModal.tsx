@@ -1,17 +1,23 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { downloadCertificatePng } from '../services/certificateDownload';
 
 export function CertificateModal({
   studentName,
   onClose,
   onGenerated,
+  onOpened,
 }: {
   studentName: string;
   onClose: () => void;
   onGenerated: () => void;
+  onOpened?: () => void;
 }) {
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState('');
+
+  useEffect(() => {
+    onOpened?.();
+  }, [onOpened]);
 
   async function downloadCertificate() {
     if (downloading) return;
