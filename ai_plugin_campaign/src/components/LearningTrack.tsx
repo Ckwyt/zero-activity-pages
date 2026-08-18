@@ -35,6 +35,7 @@ export function LearningTrack({
   onMockAiInteraction,
   onAction,
   onCertificate,
+  certificateNameLoading = false,
 }: {
   progress: ActivityProgress;
   t1: number;
@@ -44,6 +45,7 @@ export function LearningTrack({
   onMockAiInteraction: () => void;
   onAction: (action: 'drive' | 'search' | 'skin' | 'pdf' | 'summary') => void;
   onCertificate: () => void;
+  certificateNameLoading?: boolean;
 }) {
   const [now, setNow] = useState(() => Date.now());
   const unlocks = getLearningUnlocks({ t1, t6 }, new Date(now));
@@ -191,10 +193,12 @@ export function LearningTrack({
           <button
             className="pill-button pill-button--white"
             type="button"
-            disabled={!certificateUnlocked}
+            disabled={!certificateUnlocked || certificateNameLoading}
             onClick={onCertificate}
           >
-            {progress.certificateGeneratedAt ? '查看学习证明' : '领取学习证明'}
+            {certificateNameLoading
+              ? '正在获取姓名...'
+              : progress.certificateGeneratedAt ? '查看学习证明' : '领取学习证明'}
           </button>
         </div>
       </section>

@@ -18,6 +18,7 @@ import {
   markProgress,
   readCampaignSession,
 } from '../services/campaignStorage';
+import { resolveCertificateStudentName } from '../services/boundStudentNameApi';
 import { submitStudentLogin } from '../services/studentLogin';
 import {
   getCompetitionStage,
@@ -114,6 +115,10 @@ export function CampaignPage() {
   );
   const [showRules, setShowRules] = useState(staticPreview === 'rules');
   const [showCertificate, setShowCertificate] = useState(staticPreview === 'certificate');
+  const [certificateStudentName, setCertificateStudentName] = useState(
+    () => getStaticPreviewSession(staticPreview).profile?.name ?? '',
+  );
+  const [certificateNameLoading, setCertificateNameLoading] = useState(false);
   const [showSubmissionEnded, setShowSubmissionEnded] = useState(
     staticPreview === 'submission-ended',
   );
@@ -345,6 +350,30 @@ export function CampaignPage() {
     dispatchZeroCampaignAction('certificate-generated');
   }
 
+  async function openCertificate() {
+    if (certificateNameLoading) return;
+    const localStudentName = session.profile?.name;
+    if (!localStudentName) {
+      setNotice('未找到本地学生信息，请重新登录。');
+      return;
+    }
+
+    if (isStaticPreview) {
+      setCertificateStudentName(localStudentName);
+      setShowCertificate(true);
+      return;
+    }
+
+    setCertificateNameLoading(true);
+    try {
+      const studentName = await resolveCertificateStudentName(localStudentName);
+      setCertificateStudentName(studentName);
+      setShowCertificate(true);
+    } finally {
+      setCertificateNameLoading(false);
+    }
+  }
+
   return (
     <div className={`campaign-app campaign-app--${track}`}>
       <div className="campaign-content" inert={storageReady && session.profile ? undefined : true}>
@@ -367,7 +396,8 @@ export function CampaignPage() {
             onLearn={learn}
             onMockAiInteraction={mockAiInteraction}
             onAction={performAction}
-            onCertificate={() => setShowCertificate(true)}
+            certificateNameLoading={certificateNameLoading}
+            onCertificate={openCertificate}
           />
         ) : competitionStage === 'showcase' || competitionStage === 'awards' ? (
           <CompetitionShowcase
@@ -392,7 +422,7 @@ export function CampaignPage() {
       ) : null}
       {showCertificate && session.profile ? (
         <CertificateModal
-          studentName={session.profile.name}
+          studentName={certificateStudentName || session.profile.name}
           onClose={() => setShowCertificate(false)}
           onGenerated={generateCertificate}
         />
